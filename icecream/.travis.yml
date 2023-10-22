@@ -1,0 +1,104 @@
+language: cpp
+
+script:
+  - |
+        if test "$TRAVIS_OS_NAME" = "osx"; then
+            # set up the catalog properly for asciidoc
+            sudo mkdir /etc/xml
+            sudo ln -s /usr/local/etc/xml/catalog /etc/xml/catalog
+        fi
+  - ./autogen.sh
+  - ./configure --prefix=$PWD/_inst
+  - make -s -j $(getconf _NPROCESSORS_ONLN)
+  - |
+        if test "$TRAVIS_OS_NAME" = "linux"; then
+            strict="-strict"
+            if test -n "$VALGRIND"; then
+                # See tests/README.
+                sudo /sbin/setcap cap_sys_chroot+ep /usr/lib/valgrind/memcheck-amd64-linux
+            fi
+            make -s test${strict} VALGRIND=$VALGRIND TESTCC=gcc TESTCXX=g++
+            if test $? -ne 0; then
+                exit 1
+            fi
+            make -s test${strict} VALGRIND=$VALGRIND TESTCC=clang TESTCXX=clang++
+            if test $? -ne 0; then
+                exit 1
+            fi
+        elif test "$TRAVIS_OS_NAME" = "osx"; then
+            export PATH="/usr/local/opt/util-linux/bin:$PATH"
+            export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
+            if test -n "$STRICTTESTS"; then
+                strict="-strict"
+            fi
+            make -s test${strict} TESTCC=clang TESTCXX=clang++ SUDO=1
+            if test $? -ne 0; then
+                exit 1
+            fi
+        fi
+        make -s dist
+        if test $? -ne 0; then
+            exit 1
+        fi
+
+matrix:
+  include:
+  - os: linux
+    sudo: true # for setcap so we can run the tests in chroot.
+    compiler: gcc
+    dist: bionic
+  - os: linux
+    sudo: true # for setcap so we can run the tests in chroot.
+    compiler: clang
+    dist: bionic
+  - os: osx
+    before_install:
+      - brew update
+      - brew install lzo asciidoc docbook-xsl gdb ccache libarchive expect telnet util-linux gnu-getopt
+  - os: linux
+    sudo: true # for setcap so we can run the tests in chroot.
+    compiler: clang
+    env: VALGRIND=1
+    dist: bionic
+  - os: linux
+    sudo: true # for setcap so we can run the tests in chroot.
+    compiler: clang
+    env: BUILD_TYPE=ubsan
+    dist: bionic
+  allow_failures:
+
+before_script:
+  - |
+     if [ "$BUILD_TYPE" == "ubsan" ]; then
+         export SAN_FLAGS="-fsanitize=undefined -fno-omit-frame-pointer"
+         export LDFLAGS="$UBSAN_FLAGS ${LDFLAGS}"
+         export UBSAN_OPTIONS=print_stacktrace=1
+     fi
+  - |
+     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+         export LDFLAGS="${LDFLAGS} -L/usr/local/opt/libarchive/lib"
+         export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/libarchive/include"
+         export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
+     fi
+  - |
+      export CFLAGS="${SAN_FLAGS} ${CFLAGS} -Wall -Wextra"
+      export CXXFLAGS="${SAN_FLAGS} ${CXXFLAGS} -Wall -Wextra"
+      export LDFLAGS="${SAN_FLAGS} ${LDFLAGS}"
+
+
+addons:
+  apt:
+    packages:
+    - gcc
+    - clang
+    - libcap-ng-dev
+    - libcap-ng-utils
+    - liblzo2-dev
+    - libzstd1-dev
+    - asciidoc
+    - xsltproc # needed by asciidoc
+    - gdb
+    - valgrind
+    - libarchive-dev
+    - expect
+    - telnet
