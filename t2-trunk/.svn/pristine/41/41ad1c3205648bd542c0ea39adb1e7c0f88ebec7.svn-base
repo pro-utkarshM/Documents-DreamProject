@@ -1,0 +1,449 @@
+<chapter id="t2.intro">
+
+  <title>Introduction</title>
+
+  <simplesect id="t2.intro.intro">
+    <para>T2 is not yet another Linux distribution: It is a flexible
+    System Development Environment allowing not only the automated
+    rebuild to create a new version or to optimize for the target CPU
+    in use, it even allows the creation of adapted distributions. The
+    level of adaptation reaches from simple package selection (e.g. KDE,
+    GNOME, Xfce, Apache, Samba, etc.), special purpose patches
+    (e.g. special features for GUI applications, specially patched
+    kernels, ...), custom output format (such as Live-CD or ROM image
+    for embedded systems) to tight integration with 3rd party
+    administration, management, networking or other software. In
+    summary T2 is an integrated development environment for custom
+    distributions.</para>
+    
+    <para>The possible application range includes normal servers,
+    desktop systems, specialized firewalls, routers or Network
+    Attached Storage solutions and all kinds of embedded
+    devices.</para>
+
+    <para>The T2 framework includes the automated build system,
+    architecture and target descriptions, as well rich set or packages
+    descriptions - currently already over 2800! These package
+    descriptions only contain parameters needed to build a package and
+    information for the end-user installer. Additionally the T2
+    packages are left unmodified wherever possible. So that by
+    default the packages behave in the way as intended by their
+    upstream authors. Patches are only included if needed for clean
+    compilation (e.g. cross compilation) or bug and security fixes -
+    not the intrusive set of patches most often included in other
+    commercial distributions.</para>
+    
+    <para>T2 is a fork from ROCK Linux<footnote><para>The fork happened
+    due to major technical disagreements in the ROCK Linux 2.1
+    development series, as well as ongoing communication problems,
+    disagreements in project management, openness and Linux conference
+    presentations.</para></footnote>which in turn is not based on
+    another distribution - it was developed from scratch in 1998 by
+    Clifford Wolf and many other contributors. </para>
+    
+    <para>The name 'T2' started as an intern project name for "try
+    two, second try" and "technology (level) two" and was not intended
+    as final project name. However, T2 became too popular within the
+    first months and thus the name was not easy to change anymore and
+    eventually became the official project name.</para>
+    
+    <para>At this point we would like to point out that T2 must not be
+    hard to install. While there is indeed a classic installer option
+    which includes a text mode installer where one need to be a fairly
+    experienced Linux user, more user-friendly options, such as a
+    LiveCD (DVD, USB stick, ...) option, exists as well. Additionally
+    a T2 target can add its own startup and install setups and thus
+    innovate in this area.</para>
+
+    <para>However many users and administrators still prefer the
+    classic textual install as it offers a great deal of flexibility
+    and control. For example all the services have to be turned on by
+    hand and you have to be able to understand most configuration
+    files from the original packages. T2 does not contain an intrusive
+    set of system administration utilities - however the basic system
+    configuration is provided by our setup tool STONE. Powerful and
+    yet complex tools need to be set up correctly - and colorful setup
+    tools hide the fact that the administrator needs to be informed
+    about the configuration details. Those automated everything tools
+    are one of the reasons for all the SPAM and worms flooding the
+    Internet. So think again if you see that as a problem - it also
+    teaches you how to do things right.</para>
+
+    <note>
+      <para>To Linux newbies: Building a server configuration with T2
+      can involve a steep learning curve. Nevertheless it is a very
+      rewarding experience and after some months you will realise you
+      will never look back. Make sure you have time to dive in and
+      understand what it is all about. Linux is one of the best
+      documented operating systems in the world! Make sure to tap
+      those resources.</para>
+    </note>
+    
+    <para>But because of its clean structure and packages T2 Linux is
+    a very good Linux edition for system administrators and
+    end-users. T2 Linux was developed from scratch and is maintained
+    by a collaborative group of people.</para>
+    
+  </simplesect>
+
+  <sect1 id="t2.intro.different.sde">
+    <title>Different as SDE</title>
+  
+    <blockquote><para>T2 is cross-architecture.</para></blockquote>
+    
+    <para>Portability is a great advantage of T2. It is possible to
+    cross-compile easily or add new architectures in a short time.
+    Currently there is support for Alpha, ARM, AVR32, Blackfin, CRIS,
+    HPPA, HPPA64, IA64, MIPS, MIPS64, Motorola 68000 (68k), PowerPC,
+    PowerPC-64, SPARC, SPARC64 (UltraSPARC), SuperH, x86, and
+    x86-64.</para>
+
+    <blockquote><para>T2 is cross-platform.</para></blockquote>
+    
+    <para>Due to the nature of the automated build system and clean,
+    parameterized packages it is easy to exchange the Linux kernel
+    with Hurd, Minix, a BSD, Haiku, OpenSolaris or OpenDarwin to build
+    a complete non-Linux platform. Work to support Minix and OpenBSD
+    has begun, however this still lacks more volunteers.</para>
+
+    <para>Another way to utilize T2 is to build single packages into
+    foreign binary-only systems. Systems where the kernel or user
+    interface sources are not open, such as Apple's Mac OS X or
+    Microsoft's Windows. T2 could be used as add-on manager for open
+    source packages.</para>
+
+    <blockquote><para>T2 aims to use as few patches on packages as
+    possible.</para></blockquote>
+
+    <para>T2 is different, it takes the form of a group of scripts for
+    building and installing the distributions. One of the basic
+    assumptions is that packages should be installed following the
+    standards of their creators. This contrasts with the patched up
+    systems created by most other distributions. T2 only patches when
+    absolutely necessary: compile, security and bug fixes only.</para>
+    
+    <blockquote><para>T2 contains the latest versions of
+    packages.</para></blockquote>
+    
+    <para>One great aspect of T2 is that the package
+    configurations usually point to the latest packages and so also
+    one of the latest kernels.</para>
+
+    <para>One great benefit of Open Source software is that software
+    gets updated often. With T2 you get a tool to update your entire
+    distribution often - instead of regularly updating the kernel and
+    packages by hand.  Together with a tool like Cfengine (GNU
+    Configuration Engine , see <!--TODO-->\cite{CFENGINE}) you get an
+    environment which can be updated easily. In fact T2 users tend to
+    run really up-to-date systems.</para>
+    
+    <blockquote><para>T2 is completely self-hosting.</para></blockquote>
+    
+    <para>It has been proven that the enormous utilization of core
+    applications within a complete T2 Linux build is a really good
+    stress-test for these packages and helps to find bugs, reaching
+    from very trivial to the very intricate.</para>
+    
+    <blockquote><para>T2 is complete.</para></blockquote>
+
+    <para>Although minimal T2 distribution can be rather small (less
+    than 10 MB for an embedded firewall) you can already get a compact
+    functional system from the minimal package selection template.
+    Nevertheless, T2 includes a big package repository with a
+    wide-range of application areas: X.org, KDE, GNOME, Xfce, Apache,
+    Samba, Suid, and multiple thousands more. Among those are also
+    quite a exceptional selection of special purpose, minimal embedded
+    packages such as dietlibc, uclibc, busybox, embutils, dropbear and
+    many others not commonly found in other systems.</para>
+    
+    <blockquote><para>Extending T2 is easy.</para></blockquote>
+    
+    <para>In the case you want to add a package to T2 you normally
+    only need to fill some textual meta information. All packages get
+    downloaded from the original locations. For each package T2 just
+    maintains meta-data.</para>
+
+    <para>The build-system builds most package-types automatically and
+    modifying a package build, or even replacing its build completely
+    for a new target, can be achieved within the target.</para>
+    
+    <blockquote><para>Scripting is power.</para></blockquote>
+    
+    <para>Because of the fact that T2 consists of shell scripts it is
+    easy to see what is happening under the hood. Also it gives you
+    the possibility to change the automatisms according to your own
+    needs. The included targets are just examples of such adaptations
+    and contrasts to e.g. RedHat's policy not to support any automated
+    RPM rebuilds (in addition to the often not-compileable
+    sRPMs).</para>
+
+    <para>In fact the system has proves to be very powerful just
+    because of the scripting system.</para>
+ 
+    <blockquote><para>T2 is the ultimate do-it-yourself
+    distribution.</para></blockquote>
+
+    <para>The build and install system is easily accessible and
+    modified to one's own needs. Furthermore the direction T2
+    development has taken emphasises this particular strength of the
+    distribution.</para>
+    
+    <blockquote><para>There is no other SDE</para></blockquote>
+
+    <para>There is no other SDE where you can define a target, with
+    package selection, package modifications, optimization settings
+    and cross-compile builds in such flexible and complete
+    ways.</para>
+
+  </sect1>
+  
+  <sect1 id="t2.intro.different.distribution">
+    <title>Different as Distribution</title>
+    
+    <blockquote><para>T2 adheres to standards.</para></blockquote>
+    
+    <para>T2 gets as close to standards as it can. But with a
+    pragmatic view. For example it uses the FHS (File Hierarchy
+    Standard) and LSB (Linux Standard Base), but with exceptions where
+    impracticable.</para>
+    
+    <blockquote><para>T2 makes no assumptions about the
+    past.</para></blockquote>
+    
+    <para>If you have been using one of the major distributions like
+    SuSE or RedHat you'll realise a lot of items have been patched
+    in. This increases the dependency on those distributions (intended
+    or not). It is hard for the larger distributions to revert on this
+    practise because of backward compatibility issues (when
+    upgrading). T2 will patch some sources (for example when a package
+    does not comply with the FHS), but leaves it to an absolute
+    minimum - for example no added features or branding.</para>
+    
+    <para>The same philosophy applies to T2 itself. T2, and its
+    package system, have gone through several redesign phases and
+    little consideration is given toward backward compatibility. This
+    may be inconvenient, but the fact is that every incarnation of T2
+    is cleaner, yet more powerful than its predecessor.</para>
+    
+    <blockquote><para>T2 is built optimally.</para></blockquote>
+    
+    <para>With T2 all packages are built with the optimisations you
+    want and the target platform. Other distributions usually build
+    for generic i386 or Pentium. With T2 you can automatically build
+    Linux, glibc, X.org, KDE, GNOME and the other CPU intensive
+    packages - yes the whole distribution! - optimized for your
+    CPU.</para>
+    
+    <blockquote><para>T2 uses few resources.</para></blockquote>
+    
+    <para>T2 build and installation scripts are Bash scripts. Due to
+    the optimization for a given CPU, the non-X11 based installation
+    and setup as well as the lightweight init scripts you can save
+    many resources on old computers. Additionally space optimized
+    alternative C libraries such as dietlibc and uclibc as well as
+    minimal add on tools such as busybox and embutils can reduce
+    resource use drastically. Also available are more lightweight
+    choices in various other areas from Xfce to lightweight http
+    servers, init systems, ...</para>
+    
+    <blockquote><para>Services have to be turned on
+    explicitly</para></blockquote>
+    
+    <para>Also packages and services have to be turned on explicitly,
+    manually. When you boot a fresh T2 installation you'll find the
+    minimum of services configured to be active.</para>
+
+    <para>From the system administrator's perspective this is ideal
+    for new installations. It compares favourably with cleaning up and
+    closing all services of a bloated commercial distribution.</para>
+
+    <blockquote><para>T2 is ready to burn on a
+    CDROM.</para></blockquote>
+
+    <para>After building T2 from sources you can burn the (target) T2
+    distribution directly onto CDROM for installation on other
+    machines (and pass it on to other people).</para>
+    
+    <blockquote><para>T2 can easily be installed over a
+    network.</para></blockquote>
+    
+    <para>The installation process is terminal based. Installing
+    remotely and configuring the new system over a network connection
+    is not uncommon.</para>
+    
+    <blockquote><para>There is no other distribution like T2
+    Linux.</para></blockquote>
+    
+    <para>By now it should be clear T2 does not look like any of
+    the other distributions. Debian, while also a collaborative
+    effort, is a great distribution but is in many ways more like the
+    commercial editions. The BSD variants come closer.</para>
+
+    <para>The only one that has come close recently are OpenEmbedded
+    and Gentoo. It is interesting to see where these build-it-yourself
+    (meta) distributions compare and differ to the System Develoment
+    Environment T2:
+
+    <indexterm>
+      <primary>OpenEmbedded</primary>
+    </indexterm>
+    <indexterm>
+      <primary>Gentoo</primary>
+    </indexterm>
+
+    <table id="t2.intro.different.distribution.tbl-1">
+	<title>T2 SDE, OpenEmbedded and Gentoo compared</title>
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry>T2</entry>
+              <entry>OpenEmbedded</entry>
+              <entry>Gentoo</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Bash based</entry>
+              <entry>proprietary BitBake based</entry>
+              <entry>Python / Bash based</entry>
+            </row>
+            <row>
+              <entry>chroot build</entry>
+              <entry>???</entry>
+              <entry>chroot build</entry>
+            </row>
+            <row>
+              <entry>developer and end-user oriented</entry>
+              <entry>developer oriented</entry>
+	      <entry>end-user oriented</entry>
+	    </row>
+            <row>
+              <entry>fully automatic package build type detection</entry>
+              <entry>BitBake recipes with inheritance</entry>
+              <entry>each package needs a full ebuild script</entry>
+            </row>
+            <row>
+              <entry>autodetected dependencies</entry>
+              <entry>manually hardcoded dependencies (many monkeys
+              method)</entry>
+              <entry>manually hardcoded dependencies (many monkeys
+              method)</entry>
+            </row>
+            <row>
+              <entry>sophisticated wrappers</entry>
+              <entry>???</entry>
+              <entry>hardcoded e.g. CFLAGS</entry>
+            </row>
+            <row>
+              <entry>installable, live, and firmware ROM images</entry>
+              <entry>firmware ROM images</entry>
+              <entry>rebuild on each system, LiveCD creation as add-on scripts (Catalyst)</entry>
+            </row>
+            <row>
+              <entry>multiple alternative C libraries</entry>
+              <entry>multiple alternative C libraries</entry> <!-- TODO: review -->
+              <entry>just the single packages, no whole-build support</entry>
+            </row>
+            <row>
+              <entry>multiple init systems</entry>
+              <entry>???</entry>
+              <entry>just the single packages, no sophisticated pre-configuration</entry>
+            </row>
+            <row>
+              <entry>cross build of X.org and more</entry>
+              <entry>cross build of some (how many ???)</entry> <!-- TODO: review -->
+              <entry>no integrated cross build support, seperate
+              Embedded Gentoo effort</entry>
+            </row>
+            <row>
+              <entry>cluster build, distcc, icecream, ...</entry>
+	      <entry>???</entry>
+	      <entry>-</entry>
+            </row>
+            <row>
+              <entry>separated target config and custom file overlay</entry>
+              <entry>seperated target config, likewise</entry>
+              <entry>emerge, edit compile on each system</entry>
+            </row>
+            <row>
+              <entry>thousands of packages</entry>
+              <entry>mostly embedded package subset, not all desktop
+              and server packages</entry>
+              <entry>more and more packages get removed (into external
+              overlays, such as E17 et al.)</entry>
+            </row>
+	  </tbody>
+        </tgroup>
+      </table>
+
+    </para>
+
+    <para>The biggest difference is that Gentoo does not include the
+    facility to predefine targets and their custom setup
+    permanently. Instead on Gentoo everyone re-emerges all the
+    packages via pre-built binaires or source code on each
+    system. Inconvienient for developpers is, that Gentoo does not
+    include an auto-build-system like T2 does. Each package needs a
+    full .ebuild script where even the tar-balls extraction is
+    triggered manually - and often even the resulting files are copied
+    by hand. Gentoo and OpenEmbedded also are based on hardcoded
+    dependencies - in contrast T2 determines them automatically and
+    stores them into a cache.</para>
+    
+    <para>The biggest difference to OpenEmbedded is that T2 uses
+    normal shell scripts to implement the build system, while
+    OpenEmbedded bases on a properitary BitBake tool and associated
+    meta-data that must be explicitly installed and is yet a
+    properitary format to learn. Getting started as well as the
+    learning curve is way easier in the T2 world and thus it is most
+    comfortable to use T2 as a foundation for building your own
+    (specialized) distribution. It is therefore we call it a System
+    Development Environment, abbreviated to: SDE. Also the T2 build
+    system is faster and supports distributed cluster builds (via
+    distcc and icecream) and compiler caching (via ccache). You can
+    find more information about these tools at <ulink
+    url="http://distcc.samba.org/"/>, <ulink
+    url="http://en.opensuse.org/Icecream"/> and <ulink
+    url="http://ccache.samba.org"/>.</para>
+
+    <para>It has been stated T2 Linux is more BSD with a GNU/Linux
+    core than anything else: T2 has a ports collection (called package
+    repositories), a make world (called scripts/Build-Target) and
+    like OpenBSD prefers the <emphasis>disabled feature by
+    default</emphasis> method. This may make OpenBSD T2's closest
+    relative.</para>
+    
+  </sect1>
+  
+  <sect1 id="t2.intro.community">
+    <title>Community</title>
+    
+    <para>T2 has a mailing list and an archive thereof. It is a good
+    idea to subscribe and to voice your ideas and amendments. Not like
+    Groucho:
+    
+    <blockquote><para>It is better to remain silent and be thought a
+    fool, than to open your mouth and remove all
+    doubt.</para></blockquote>
+    
+    Often there is discussion on IRC:
+    
+    <screen>irc.freenode.net channel #t2</screen>
+    
+    You can find a threaded digest of the mailing list at <ulink
+    url="http://www.t2-project.org/contact/"/>.</para>
+    
+    <para>Finally the T2 SDE website contains a nice search facility
+    which can be really helpful. In fact, before sending a mail to the
+    mailing list, take a quick look first. It is likely someone has
+    had the same problem before.</para>
+    
+  </sect1>
+  
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

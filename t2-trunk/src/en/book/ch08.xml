@@ -1,0 +1,1873 @@
+<chapter id="t2.config">
+  
+  <title>Configuration</title>
+  
+  <sect1 id="t2.config.boot">
+    <title>Boot Loader</title>
+    
+    <para>The boot-loader is responsible to load the operating system
+    kernel into the system memory, either from a hard-disk, via
+    network or other media. After a successful load it passes the
+    control of execution to the kernel - which in turn initializes the
+    hardware and starts up system services including a possible user
+    interface.</para>
+
+    <para>With modern T2 Linux versions the setup tool STONE should be
+    able to setup the boot-loader properly and the system should boot
+    into T2 Linux after the installation.</para>
+  
+    <para>However there might be some platform where STONE is not yet
+    able to configure the boot-loader or circumstances where custom
+    adaptations is needed, for example when other operating systems
+    should optionally be booted.</para>
+  
+  </sect1>
+  
+  <sect1 id="t2.config.boot.lilo">
+    <title>LILO</title>
+    
+    <indexterm>
+      <primary>lilo</primary>
+    </indexterm>
+    <indexterm>
+      <primary>lilo</primary>
+      <secondary>lilo.conf</secondary>
+    </indexterm>
+  
+  <para>Be aware that lilo is a quite minimalistic boot-loader. It
+  stores a static block list where to load the kernel images. So
+  everytime you change the config or the kernel images you have to
+  re-run the lilo program. Modern boot-loaders like GRUB
+  might be a better choice. They can ready the filesystem natively and
+  often include a shell-like interface to manipluate the whole
+  configuration on-the-fly.</para>
+
+  <para>For a better understanding of LILO please the LDP LILO Howto
+  \cite{LILOHowto}.</para>
+
+       
+    <sect2 id="t2.config.boot.lilo.install">
+      <title>Clean Install</title>
+      
+      <para>In T2 Linux the lilo package installs a STONE module which
+      can configure and install lilo automatically.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.boot.lilo.examples">
+      <title>Configuration Example for Manual Installation</title>
+      
+      <para>The layout of configuration file /etc/lilo.conf is quite
+      simple. The file might contain multiple image section specifying
+      the kernel image to load, with optional arguments
+      thereafter. With 'root=' the system's root device needs to be
+      specified, 'label=' specifies the name used by lilo to refer to
+      this configuration and 'read-only' specifies that the root
+      device should be mounted read only by default.  So a basic
+      configuration looks like:
+
+<screen>
+image = /boot/vmlinuz
+  root = /dev/ide/host0/bus0/target0/lun0/part2
+  label = t2
+  read-only
+</screen>
+
+      After the configuration was changed the lilo executeable must be
+      run to update the static block-lists ...</para>
+      
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.config.boot.grub">
+    <title>GRUB</title>
+    
+    <indexterm>
+      <primary>grub</primary>
+    </indexterm>
+    <indexterm>
+      <primary>grub</primary>
+      <secondary>menu.lst</secondary>
+    </indexterm>
+    
+    <para>Grub is a modern boot-loader which is able to read the
+    filesystem natively and includes a shell-like interface to
+    manipulate the configuration on-the-fly. It only needs to store
+    the block-list for the second stage loader (unlike LILO which
+    needs to store the block-list for each kernel image - and so need
+    to be rerun after each kernel or config change).</para>
+    
+  <sect2 id="t2.config.boot.grub.install">
+    <title>Clean Install</title>
+      
+      <para>In T2 Linux the grub package installs a STONE module which
+      can configure and install grub automatically.</para>
+    </sect2>
+    
+  <sect2 id="t2.config.boot.grub.examples">
+    <title>Configuration Example for Manual Installation</title>
+      
+      <para>The layout of configuration file /boot/grub/menu.lst
+      differs from the usual lilo style config.</para>
+      
+      <para>The file might contain multiple sections. Each section
+      starts with the 'title' keyword specifying the name used by grub
+      to refer to this configuration. The next statement needs to
+      specify the partition grub should read the kernel image
+      from. Via the keyword 'kernel' grub set up to load the specified
+      file for execution and pass the optional arguments. The optional
+      arguments usually include 'root=' to specify the system's root
+      device as well as 'ro' to configure that the root device should
+      be mounted read only by default. So a basic configuration looks
+      like:
+
+<screen>title  T2 Linux
+  root (hd1,0)
+  kernel /boot/vmlinuz root=/dev/ide/host0/bus0/target0/lun0/part2 ro</screen>
+
+</para>
+      
+    </sect2>
+    
+    <sect2 id="t2.config.boot.grub.floppy">
+      <title>Creating a GRUB Floppy Disk</title>
+
+      <para>Although grub is one of the most advanced boot-loaders, it
+      sometimes fails to install from inside a Linux system (e.g. when
+      many IDE or SCSI devices are present and the BIOS devices can
+      not be guessed - or when floppy support is enabled in the BIOS
+      but no floppy drive is present). In such a case or for
+      maintenance you might want to install grub from a floppy
+      disk. First you need to create a grub floppy via:
+
+<screen>cat /boot/grub/stage1 /boot/grub/stage2 > /dev/floppy/0</screen>
+
+      which outputs the two grub files stage1 and stage2 which are
+      then written to your floppy drive 0. It is bootable and can be
+      used to boot or install grub on defect systems.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.boot.grub.floppy.install">
+      <title>Installing GRUB from a floppy disk</title>
+
+      <para>After creating the boot-disk in the last section you boot
+      this floppy and perform the installation of grub from out-side
+      of the OS (using grubs native BIOS access when the x86 is
+      running in Real-Mode ...). Do this by entering the following in
+      the grub shell: (do not forget to substitute the disk and
+      partition number 0 to the ones used on your workstation!)
+
+<screen>
+install (hd0,0)/boot/grub/stage1 (hd0) (hd0,0)/boot/grub/stage2 \
+        (hd0,0)/boot/grub/menu.lst
+</screen>
+
+      This tells grub to install the stage1 file /boot/grub/stage1 from
+      the 1st partition of your first hard-disk into the first
+      hard-disk's Master-Boot-Record (MBR).  Grub will then use the
+      stage2 file /boot/grub/stage2 and the menu file
+      /boot/grub/menu.lst from the same hard-disk and partition.</para>
+      
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.config.boot.yaboot">
+    <title>Yaboot</title>
+    
+    <indexterm>
+      <primary>yaboot</primary>
+    </indexterm>
+    <indexterm>
+      <primary>yaboot</primary>
+      <secondary>ybin</secondary>
+    </indexterm>
+    
+    <para>On PowerPC OpenFirmware machines, like Apple NewWorld
+    hardware or newer IBM workstations and servers yaboot is used to
+    load the kernel image.  Yaboot falls into the category of
+    new-generation loaders that are able to read filesystems
+    natively.</para>
+
+    <para>Some care needs to be taken in the way the configuration
+    file is looked up by the loader. On Apple systems the OpenFirmware
+    loads the kernel image from a specially blessed system folder on a
+    HFS volume - and yaboot (in fact ybin inside a running Linux
+    system) stores the binary and config file inside this tiny
+    volume.</para>
+
+    <para>On IBM machines (like the RS6000/B50) the OpenFirmware just
+    load any data from the partition of type '41 PPC PReP Boot'. Since
+    there is not a file-system structure on it yaboot can not store
+    information on it.  This is way it just scans all file-system for
+    a /etc/yaboot.conf files and utilizes the first match ...</para>
+
+    <sect2 id="t2.config.boot.yaboot.examples">
+      <title>Configuration Example for Manual Installation</title>
+      
+      <para>The layout of configuration file /etc/yaboot.conf is quite
+      simple and simillar to the one used by lilo as explained in
+      section <xref linkend="t2.config.boot.lilo"/>.</para>
+
+      <para>In addition some global options might be needed in order
+      to configure yaboot for your platform, for example on Apple
+      NewWorld systems the bootstrap partition (a tiny HFS format
+      partition) needs to be specified via 'boot=' keyword, the
+      default OpenFirmware device with 'device=', the yaboot partition
+      via 'partition=' and the OpenFirmware CHRP script via
+      'magicboot='. All of this global options are not needed on IBM
+      PowerPC hardware.</para>
+
+      <para>So a basic configuration looks mostly like the one for
+      lilo expect some global option needed to setup yaboot on Apple
+      NewWorld hardware:
+
+<screen>
+boot=/dev/ide/host0/bus0/target0/lun0/part2
+device=hd:
+partition=6
+magicboot=/usr/lib/yaboot/ofboot
+
+image = /boot/vmlinuz
+  root = /dev/ide/host0/bus0/target0/lun0/part2
+  label = t2
+  read-only
+</screen>
+
+      In contrast to lilo, yaboot is able to read the filesystems
+      natively - and so reads the configuration file and the kernel
+      images each time it is executed during system boot-up. There is
+      no need to run yaboot (or more exactly the bootstrap
+      installation helper ybin) when the configuration file
+      changed. Only on Apple systems that boot from the HFS volume, it
+      is necessary to run ybin to store a copy of the configuration
+      file on the tiny HFS bootstrap volume.</para>
+
+    </sect2>
+  </sect1>
+
+  <sect1 id="t2.config.boot.silo">
+    <title>SILO</title>
+    
+    <indexterm>
+      <primary>silo</primary>
+    </indexterm>
+    <indexterm>
+      <primary>silo</primary>
+      <secondary>silo.conf</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>SPARC</primary>
+    </indexterm>
+
+    <para>On SPARC and Ultra SPARC workstation and server systems,
+    silo is used to load the kernel image. </para>
+
+    <para>Silo falls into the category of new-generation loaders that
+    are able to read filesystems natively - but silo only supports
+    ext2, iso9660 and ufs filesystems.  So the choise for the
+    filesystem holding the kernel images is quite limitted ...</para>
+
+    <sect2 id="t2.config.boot.silo.install">
+      <title>Clean Install</title>
+      
+      <para>In T2 Linux the silo package installs a STONE module which
+      can configure and install lilo automatically.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.boot.silo.examples">
+      <title>Configuration Example for Manual Installation</title>
+      
+      <para>The layout of configuration file /etc/silo.conf is quite
+      simple. The file might contain multiple image section specifying
+      the kernel image to load, with optional arguments
+      thereafter. With 'root=' the system's root device needs to be
+      specified, 'label=' specifies the name used by silo to refer to
+      this configuration and 'read-only' specifies that the root
+      device should be mounted read only by default. So a basic
+      configuration looks like:
+
+<screen>
+image = /boot/vmlinux64.gz
+        root = /dev/ide/host0/bus0/target0/lun0/part2
+        label = t2
+        read-only
+</screen>
+
+      A quite unique feature of silo are architecture dependent kernel
+      images. The architecture comma separated and specified in
+      brackets ('[]') behind the image keyword:
+
+<screen>
+image[sun4u] = /boot/vmlinux64.gz
+        label   = install
+        initrd  = /boot/initrd.img
+
+image[sun4c,sun4d,sun4m]=/boot/vmlinux.gz
+        label=install
+        initrd=/boot/initrd.img
+</screen>
+
+      Using this feature, it is possible to create CDs boot-able on
+      32bit and 64bit SPARC systems.</para>
+
+      <para>The silo executeable must only be run when silo is first
+      installed into the boot sector.</para>
+
+    </sect2>
+  </sect1>
+    
+  <sect1 id="t2.config.boot.aboot">
+    <title>ABoot</title>
+    
+    <indexterm>
+      <primary>aboot</primary>
+    </indexterm>
+    <indexterm>
+      <primary>aboot</primary>
+      <secondary>aboot.conf</secondary>
+    </indexterm>
+    
+    <para>On Alpha workstations with SRM, aboot is used to load the
+    kernel image. Aboot falls into the category of new-generation
+    loaders that are able to read filesystems natively - but aboot
+    only supports ext2, iso9660 and ufs filesystems.  So the choise
+    for the filesystem holding the kernel images is quite limitted
+    ...</para>
+    
+    <sect2 id="t2.config.boot.aboot.examples">
+      <title>Configuration Example for Manual Installation</title>
+      
+      <para>The layout of configuration file /etc/aboot.conf differs
+      from the usual lilo style config - and is really simple.</para>
+
+      <para>It just contains a list of images to load starting with a
+      unique number for later reference, for example at the SRM prompt
+      - separated by a colon the partition containing the kernel image
+      must be specified follow by the kernel filename and optional
+      arguments. So a basic configuration looks like:
+
+<screen>
+0:2/vmlinuz root=/dev/ide/host0/bus0/target0/lun0/part2 ro
+</screen>
+</para>
+
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.config.no-root">
+    <title>I have no root and I want to scream</title>
+    
+    <para>If your kernel yields the error message 'I have no root and
+    I want to scream', the root device containing T2 Linux is not
+    properly defined in the boot loader configuration file. Double
+    check if it is correct - most boot loaders allow to specify such
+    parameters at run-time so you can try a variant before you write
+    it into the configuration file.</para>
+  </sect1>
+  
+  <sect1 id="t2.config.kernel">
+  <title>Linux Kernel</title>
+  
+  <para>The Linux kernel is the core of the GNU/Linux
+  system. Upgrading the kernel is a normal process one should perform
+  every few months when a new stable release is released with bug
+  fixes or even security fixes.  Another reason might be to test the
+  development versions of the kernel e.g. to take advantage of new
+  drivers or optimizations - or just to validate the development-state
+  or help bug-hunting.</para>
+
+  <para>We strongly suggest to use the T2 Linux kernel packages
+  because you will miss some T2 Linux specific features or hot-fixes
+  not yet in the official kernel. Also a lot "third-party" kernel
+  modules, such as W-LAN, webcam and virtualization drivers are built
+  in the T2 controlled kernel build automatically. You can update the
+  kernel by just building it via scripts/Build-Pkg or
+  scripts/Emerge-Pkg as usual.</para>
+
+  <sect2 id="t2.config.kernel.config">
+    <title>Configuration</title>
+
+    <para>The configuration for the kernel is performed automatically
+    by parsing and merging the various configuration sources: the
+    version of the package itself, architecture specific options,
+    target specific options and user supplied values. You can define
+    custom kernel configuration - and even disable the automatics -
+    using scripts/Config. The kernel options are located in the
+    expert section named 'Linux Kernel Options'. The possible styles
+    of configuration generation are:
+
+<screen>
+( ) Do not perform any automatic kernel configuration
+( ) Perform normal kernel configuration without modules
+(X) Perform normal kernel configuration including modules
+</screen>
+
+      'Do not perform any automatic kernel configuration' will use the
+      static configuration the user must supply either adding the
+      rules in the configuration menu or by placing them manually in
+      config/$id/linux.cfg. The last two options will use the full T2
+      Linux facilities to generate the configuration automatically -
+      and so will also merge in user-supplied rules. 'Perform normal
+      kernel configuration including modules' is the default.</para>
+
+      <para>For further information on how to compile the Linux kernel
+      see \cite{KernelHowto}.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="t2.config.fs">
+  <title>Managing Filesystems and Files</title>
+  
+  <para>This chapter gives you an introduction how Linux systems
+  handle devices, filesystems as well as users, groups and
+  permissions.</para>
+
+  <para>It is a very simple topic and it is good to fully understand
+  this topic when handling your data stored in the filesystems.</para>
+  
+  <sect2 id="t2.config.fs.mount">
+    <title>Filesystems</title>
+    
+    <para>The first thing to understand while dealing with the Linux
+    filesystem is that everything can be accessed as a file. Even
+    system resources and hardware has a file representation that is
+    used to access it. Those special files usually live in
+    /dev.</para>
+
+    <para>The second thing to know is that all files are addressed in
+    a tree which starting location for all files is '/' - which is
+    pronounced 'root'.</para>
+
+    <indexterm>
+      <primary>mount</primary>
+      <secondary>mounting</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>mount</primary>
+      <secondary>mount-point</secondary>
+    </indexterm>
+    
+    <para>Any filesystem, be it stored on a removeable floppy disk, a
+    CD-ROM, fixed hard disc, ZIP disk, USB or IEEE1294 disk or stick
+    or a network resource can be attached to any point inside this
+    tree hierarchy. The attach process is called 'mounting' and the
+    directory the filesystem is mounted on is called
+    'mount-point'.</para>
+
+    <para>It is common practice to store '/usr' or '/home' on
+    different filesystems for performance or maintenance reasons. Also
+    removable media is usually mounted into '/mnt' - for example
+    '/mnt/floppy' or '/mnt/cdrom'.</para>
+    
+    <indexterm>
+      <primary>mount</primary>
+    </indexterm>
+    
+    <para>The command to mount a filesystem to a directory is:
+
+<screen>
+mount [-t fstype] something somewhere'
+</screen>
+
+    The filesystem type is normally detected automatically and
+    specifying it is optional.</para>
+
+    <indexterm>
+      <primary>/etc/fstab</primary>
+    </indexterm>
+    
+    <para>Filesystems that are always available can be automatically
+    mounted when the systems boots up. Which filesystems are mounted
+    at boot-up is controlled by /etc/fstab. All of the mounted
+    filesystems get unmounted at shutdown and must be remounted at
+    startup.</para>
+
+    <para>The layout of /etc/fstab is very simple. It lists the device
+    name - the source, followed by where in the file hierarchy it gets
+    mounted - the mount-point, as well as the filesystem type alogn
+    with some more options:
+
+<screen>
+# Device                Mountpoint   FStype  Options     Dump  Pass#
+/dev/discs/disc0/part1  swap         swap    defaults    0     0
+none                    /dev         devfs   defaults    0     0
+none                    /proc        proc    defaults    0     0
+/dev/discs/disc0/part2  /            auto    defaults    0     0
+/dev/discs/disc0/part3  /home        auto    defaults    0     0
+/dev/cdroms/cdrom0      /mnt/cdrom   iso9660 ro,noauto   0     0
+</screen>
+
+    </para>
+    
+    <para>The process (/proc) and device (/dev) filesystem (see
+    \cite{devfs}) do not have a source specified since they are
+    virtually created inside the kernel.</para>
+
+    <para>The swap partition does not have a mount-point since it is
+    not part of the filesystem - used exclusively used by the kernel
+    as temporary storage for virtual memory.</para>
+
+    <para>The FStype tells the system how the partition is
+    formatted. Usual filesystems used as system root include: exT2,
+    ext3, reiserfs or xfs.  But normally the type can be automatically
+    detected and thus auto can specified.</para>
+
+    <para>The options 'default' specifies that the partition should be
+    mounted using system defaults: that is read/write-able. The 'ro'
+    option on the CD drive declares it read only. The additional
+    option of 'noauto' indicates that this partition should not be
+    automatically mounted at boot up.</para>
+
+    <para>Your T2 Linux system should list some more filesystems like
+    '/dev/pts ' and '/dev/shm' which are used for pseudo-terminals and
+    shared-memory.  They are automatically created by stone and can
+    normally be left untouched.</para>
+  </sect2>
+  
+  <sect2 id="t2.config.perm">
+    <title>Permissions, Users and Groups</title>
+    
+    <indexterm>
+      <primary>user</primary>
+    </indexterm>
+    <indexterm>
+      <primary>group</primary>
+    </indexterm>
+    <indexterm>
+      <primary>owner</primary>
+    </indexterm>
+    
+    <para>Unix system are based on a very strong security model, the
+    user must have the correct permission for any kind of
+    operation. Each file has three permission sets. One for the owner,
+    one for the group and one for everyone else. One set of
+    permissions describe the possibility to read, write or execute the
+    file. Often one set is displayed as a row of letter in the form
+    'rwx': where 'r' stands for read access, 'w' for write access and
+    'x' for the possiblity to execute the file or enter the
+    directory. A missing access right is replace by a -. Another form
+    of notation is a octal number you get by 'r-bit*4 + w-bit*2 +
+    x-bit'.  like "6" for 'rw-'. To form the three sets they are also
+    put into a row like: "660" meaning the same as 'rw-rw----'.</para>
+
+    <para>Since the device-nodes in /dev are some kind of file too,
+    these permissions are also used for hardware access via these
+    device-nodes. So for accessing a IDE/SCSI device (e.g. a cd-writer
+    or ZIP), sound-card or other hardware devices the user must have
+    the permissions (the right) to do so.</para>
+
+    <para>The persmissions are manipulated with the following tools:
+    chmod(8), chown(8), chgrp(8).</para>
+
+    <para>Where chown can also modify the group in one set. They are
+    specified spererated by a colon (for historic reasons a dot '.' is
+    also possible, but it should be avoided and of course does not
+    work with owner names containing a '.'):
+ 
+<screen>
+chown rene:users t2-article.pdf
+</screen>
+
+    </para>
+
+    <para>The system users and groups are edited via: useradd(8),
+    userdel(8), usermod(8) groupadd(8), groupdel(8), groupmod(8) - or
+    by using the appropriated STONE module.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.perm.bother">
+      <title>Why Should a User Bother?</title>
+      
+      <para>Because even at normal workstation - even at home where
+      only one person might use the computer - security is a must in
+      the todays networked world.</para>
+
+      <para>Imaging everyone could just read or even write data on
+      your computer!  Electronic mail, financial data, pictures or
+      audio files are personal property that needs to be
+      protected.</para>
+
+      <para>Additionally a normal user should not be able to
+      accidentally damage the operating system by replacing or
+      removing an important system file - the operation should stay
+      intact regardless whatever the user might apply to the
+      system.</para>
+
+      <para>Of course the same especially applies to real networked
+      environment in companies.</para>
+
+      <para>To access any kind of hardware or data you must have the
+      permissions to do so.  For example by default in T2 Linux the
+      sound-card devices are usable for members of the group sound,
+      the video4linux video devices can be utilized by users in the
+      group video, and so on. Make sure you are a member of that group
+      before complaining something does not work!</para>
+
+    </sect2>
+  </sect1>
+
+  <sect1 id="t2.config.udev">
+    <title>U/dev</title>
+    
+    <indexterm>
+      <primary>u/dev</primary>
+    </indexterm>
+    <indexterm>
+      <primary>udev</primary>
+    </indexterm>
+    <indexterm>
+      <primary>device-node</primary>
+    </indexterm>
+    
+    <para>U/dev is a user-space implementation to manage the special
+    device-nodes in the /dev directory on your root filesystem. Kernel
+    device drivers register kobjects, while the informations are
+    exported via a virtual filesystem to /sys a u/dev daemon receivs
+    event notifications (via a netlink socket) and creates the
+    device-nodes accordingly.</para>
+
+    <para>What is special?</para>
+
+    <para>With u/dev you will only see the device-node that are
+    present on your system (as it also was the case with DevFS
+    formerly used by T2) and you can configure persistent and
+    human-readable names like /dev/ide/host0/../disc in contrast to
+    /dev/hda or to avoid long names group all discs in /dev/discs. The
+    enforcement of persistent names for example allows to make sure
+    that one device is always accessed via an given name no matter in
+    which order the devices are powered up or plugged into the
+    computer.</para>
+
+    <sect2 id="t2.config.udev.rules">
+      <title>Configuration</title>
+      
+      TODO
+    </sect2>
+    
+    <sect2 id="t2.config.udev.perm">
+      <title>Permission Configuration</title>
+      
+      TODO
+    </sect2>
+  </sect1>
+    
+  <sect1 id="t2.config.hotplug">
+    <title>Hotplug Hardware Configuration</title>
+    
+    <indexterm>
+      <primary>hotplug++</primary>
+    </indexterm>
+    
+    <para>Since version 2.0, T2 Linux includes an automatic hardware
+    detection and configuration system, including configuration of
+    devices plugged into the system at run-time.</para>
+
+    <para>Since hotplug++ is exclusively designed around the
+    <emphasis>hotplug</emphasis> mechanism of recent Linux kernels the
+    system recognizes devices in the same way whether they where
+    present during system boot-up or added to a running system. This
+    is a major improvement over other systems where this two use-cases
+    have a different code path and thus leading to
+    inconsistencies.</para>
+
+    <para>The functionality of hotplug++ is quite trivial: When a new
+    device is detected, hotplug++ matches its various ID's against
+    the available kernel modules. If a kernel module is found user
+    configurations are checked and the resulting actions are
+    executed. At system startup those hotplug events are synthesized
+    for the hardware already present and thus resulting in exactly the
+    same configuration and behavior whenever the device is added or
+    present in the system.</para>
+
+    <para>It is possible to force the load of modules for a given
+    subsystem - or to 'blacklist' certain modules that are either
+    unwanted or known to malfunction.</para>
+
+    <para>For some subsystems, for example USB or ieee1394 (also known
+    as Firewire or iLink) the action might include to set the
+    permission of device files for access by user-space application
+    such as SANE and GPhoto.</para>
+
+    <para>The list of subsystems includes: pci, isapnp, macio, usb,
+    ieee1394, net and scsi.</para>
+  
+    <sect2 id="t2.config.hotplug.config">
+      <title>Configuration Files</title>
+      
+      <para>Aside the Linux kernel module map files hotplug++ reads
+      the blacklist from /etc/conf/blacklist which can contain
+      comments prefixed with a hash ('\#') and otherwise contain one
+      module name per line.</para>
+
+      <!-- TODO: re-implement forced module loading -->
+      
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.config.initrd">
+    <title>Initrd</title>
+    
+    <indexterm>
+      <primary>initrd</primary>
+    </indexterm>
+    
+    <para>Initial ramdisks, in short initrd, are used in Linux
+    distributions for some time now to keep the core kernel slick and
+    loadable and still all drivers (modules) available to boot on a
+    given hardware.</para>
+
+    <para>In contrast to other distributions, such as even including
+    Red Hat Enterprise Linux, the T2 SDE comes with an initrd
+    implementation that ships all IDE, SCSI, ... modules by default
+    that ever could be useful to boot a machine as well as associated
+    automatic hardware detection.  This has the big advantage that the
+    underlying hardware is exchangeable without the need to tinker
+    with the initrd - which by design runs in a rather minimal
+    environment to keep the size at a minimum and thus is nothing an
+    end users want to get in touch with.</para>
+
+    <para>Additionally the T2 initrd does not contain a static binary,
+    script or Red Hat's commonly found special purpose nash
+    interpreter.  Instead it uses a statically linked pdksh shell and
+    real hardware detection utilizing our hotplug++ program. All in
+    all this setup does not only allow a T2 installation to boot
+    without an initrd regeneration or when the underlying system
+    hardware is exchanged (such as on system defect). It also offers a
+    sensible fallback for the user in form of a normal shell - for
+    example when the root filesystem can not be found for whatever
+    reason (competting implementations usually just let the kernel
+    panic in this situation).</para>
+  
+    <sect2 id="t2.config.initrd.config">
+      <title>Configuration and Regeneration</title>
+      
+      <para>When a Linux kernel is built by the T2 build system the
+      generic initrd is automatically generated.</para>
+
+      <para>To manually regenerate the initrd a script under the
+      commonly known name mkinitd can be used. Without arguments it
+      will generate the image for the currently running
+      kernel. Optionally a specific kernel version can be specified to
+      generate an image for another than the running kernel. The
+      argument -R allows the specification of another directory as
+      system root - usually this is just used by T2 during cross
+      builds, but can also be handy for the use in rescue environments
+      as well.</para>
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.config.netconf">
+    <title>Network Configuration</title>
+    
+    <indexterm>
+      <primary>netconf</primary>
+    </indexterm>
+    <indexterm>
+      <primary>ROCK Net</primary>
+    </indexterm>
+  
+    <para>Since version 2.0 T2 Linux includes a sophisticated network
+    configuration framework - which can also be easily extended. The
+    framework includes the usual basic configuration, multiple
+    interfaces, multiple profiles, DHCP, wireless and basic
+    firewalling, as well as the execution of scripts.</para>
+
+    <para>It is fairly easy to setup very complex and very simple
+    setups, 'feels good' when working directly with an ASCII editor on
+    the configuration files and easily integrates in a more or less
+    colored configuration GUI (such as stone).</para>
+    
+    <para>The user can supply an external script to detect the profile
+    to be used automatically (e.g. based on MAC addresses or ESSID's
+    in the air).</para>
+  
+    <sect2 id="t2.config.netconf.file">
+      <title>Configuration File</title>
+      
+      <para>The network configuration is stored in /etc/conf/network
+      <footnote><para>Version before T2 2.1 as well as ROCK Linux
+      store the configuration in /etc/network/.</para></footnote>. The
+      file consists of keywords followed by associated values, parsed
+      on a per line basis.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.netconf.basic">
+      <title>Keywords Recognized by the Basic Module</title>
+      
+      <para>The basic module parses the config file and recognizes the
+      basic keywords in it.</para>
+      
+      <itemizedlist>
+	<listitem>
+	  <para>auto ifname(profile, profile2, ...) ...</para>
+	  
+	  <indexterm>
+	    <primary>ifup</primary>
+	  </indexterm>
+	  <indexterm>
+	    <primary>ifdown</primary>
+	  </indexterm>
+	  
+	  <para>Lists those interfaces which should be set up
+	  automatically at boot up (list evaluated from left to right)
+	  and shut down on system shutdown (from right to left). All
+	  interfaces not listed here must be set up or shut down
+	  manually using ifup and ifdown. The 'auto' keyword must be
+	  used before the first 'interface' directive.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>forward</para>
+	  
+	  <para>If used, forwarding between interfaces will be
+	  activated at boot up and the host may be used as gateway
+	  between two networks. The 'forward' keyword must be used
+	  before the first 'interface' directive.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>interface ifname(profile, profile2, ...)</para>
+	  
+	  <para>Opens an interface section with name
+	  'ifname'. Everything after the interface statement and
+	  before the next interface statement is the configuration for
+	  that specific interface 'ifname'. All directives within an
+	  interface section are evaluated from the first to the
+	  last. The resulting configuration is stored in a priority
+	  table to achieve a reasonable evaluation when the interface
+	  brought up or shut down. For example firewall rules are set
+	  up before the interface is enabled, or wireless
+	  configurations are set before the IP address is
+	  configured.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>script filename [ parameters ]</para>
+	  
+	  <para>Execute the specified script 'filename' with the given
+	  parameters.  The parameter 'up' is inserted as first
+	  parameter when the interface is set up and the parameter
+	  'down' is inserted when the interface is shut down.</para>
+	</listitem>
+	
+	<listitem><para>run-up filename [ parameters ]</para>
+	</listitem>
+	<listitem>
+	  <para>run-down filename [ parameters ]</para>
+	  
+	  <para>Run the given command 'filename' with the given
+	  parameters when the interface is set up or shut down
+	  respectively.</para>
+	</listitem>
+      </itemizedlist>
+      
+      </sect2>
+      
+      <sect2 id="t2.config.netconf.dhcp">
+	<title>Keywords Recognized by the DHCP Module</title>
+
+	<indexterm>
+	  <primary>DHCP</primary>
+	</indexterm>
+	
+	<para>The DHCP module allows to bind a DHCP client to an
+	interface.</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>dhcp</para>
+	  
+	  <para>Enables configuration of the interface using the DHCP protocol.</para>
+	</listitem>
+       </itemizedlist>
+	    
+      </sect2>
+    
+      <sect2 id="t2.config.netconf.dns">
+	<title>Keywords Recognized by the DNS Module</title>
+      
+	<indexterm>
+	  <primary>DNS</primary>
+	</indexterm>
+	<indexterm>
+	  <primary>/etc/resolv.conf</primary>
+	</indexterm>
+	
+	<para>The DNS module provides a facility to re-create the
+	/etc/resolv.conf in a interface and profile depended
+	way.</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>search domain-list</para>
+  
+	  <para>If present, the file /etc/resolv.conf will be
+	  truncated and the domain-list added as search list.</para>
+  
+	  <para>The search list was designed to make the users lives a
+	  little easier by saving them some typing.  The idea is to
+	  search one or more domains for names given by the user that
+	  might be incomplete - that is, that might not be fully
+	  qualified domain names.</para>
+  
+	  <para>Multiple occurrences are <emphasis
+	  role="bold">not</emphasis> allowed but usage inside an
+	  interface sections to allow the interface and profile
+	  depended re-creation of /etc/resolv.conf is possible.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>nameserver ip-address</para>
+	  
+	  <para>If present, the file /etc/resolv.conf will be
+	  truncated and the ip-addresses added as
+	  name-servers. Multiple occurrences are allowed.</para>
+  
+	  <para>The keyword is also allowed inside an interface
+	  sections to allow the interface and profile dependent
+	  re-creation of /etc/resolv.conf.</para>
+	  
+	  <note>
+	    <para>In most implementations (including the GNU C Library
+	    - glibc) the occurrence of the nameserver keyword is
+	    limited to some constant - often 3.</para>
+	  </note>
+	  </listitem>
+	
+	<listitem>
+	  <para>hostname name</para>
+	  
+	  <para>Allows dynamic configuration of the system's
+	  hostname. It does not change the static configuration
+	  (stored in /etc/HOSTNAME).</para>
+	  
+	  <warning>
+	    <para>For expert and rare use only!</para>
+	  </warning>
+	</listitem>
+	
+	<listitem>
+	  <para>domainname name</para>
+	  
+	  <para>Allows <emphasis>dynamic</emphasis> configuration of
+	  the system's domainname.</para>
+	  
+	  <indexterm>
+	    <primary>/etc/hosts</primary>
+	  </indexterm>
+	  
+	  <warning>
+	    <para>This action does rewrite /etc/hosts since the file
+	    is used to determine the system's domainname. For expert
+	    and rare use only!</para>
+	  </warning>
+	</listitem>
+      </itemizedlist>
+      
+      </sect2>
+    
+      <sect2 id="t2.config.netconf.iproute">
+	<title>Keywords Recognized by the Iproute2 Module</title>
+      
+	<indexterm>
+	  <primary>iproute2</primary>
+	</indexterm>
+
+	<para>The iproute2 module provides the keywords to assign an
+	interfaces IP address and the gateway.</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>ip ip-address/netmask-bits</para>
+	  
+	  <para>Set the given ip <emphasis role="bold">and</emphasis>
+	  netmask in CIDR notation (e.g. 192.168.5.1/24) when the
+	  interface is set up, remove all IPs from the interface when
+	  the interface is shut down. Of course the keyword can be
+	  used multiple times to set multiple IPs for an
+	  interface.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>route target[/prefix] nexthop [ metric M ] [ ... ]</para>
+	  
+	  <para>Set a route to the network or host specified via
+	  target[/prefix] via nexthop.</para>
+  
+	  <para>As optional parameters specifing metric M is supported
+	  - as well as passing any option ip supports. Of course the
+	  keyword can be used multiple times to set multple routes for
+	  an interface.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>gw nexthop | [ metric M ] [ ... ]</para>
+	  
+	  <para>Set the given gateway when the interface is set up,
+	  remove the gateway when the interface is shut down.</para>
+  
+	  <para>As optional parameters specifing metric M is supported
+	  - as well as passing any option ip supports.</para>
+	</listitem>
+	
+	</itemizedlist>
+      
+      </sect2>
+
+      <sect2 id="t2.config.netconf.bridge">
+	<title>Keywords Recognized by the bridge-utils Module</title>
+
+	<indexterm>
+	  <primary>Bridge</primary>
+	</indexterm>
+	
+	<para>The bridge-utils module allows to setup a bridge
+	spanning multiple network interfaces.</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>bridge [ ifname ] [ ... ]</para>
+	  
+	  <para>Specifies the network interfaces to setup as bridge.</para>
+	</listitem>
+       </itemizedlist>
+	    
+      </sect2>
+
+      <sect2 id="t2.config.netconf.wireless">
+	<title>Keywords Recognized by the Wireless-tools Module</title>
+	
+	<para>The wireless-tools module provides most parameters of
+	the iwconfig utility.</para>
+      
+      <itemizedlist>
+	<listitem>
+	  <para>essid any</para>
+	</listitem>
+	<listitem>
+	  <para>essid name</para>
+  
+	  <para>Set the ESSID (or Network Name - in some products it
+	  may also be called Domain ID). The ESSID is used to identify
+	  cells which are part of the same virtual network.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>[ nwid | domain ] name</para>
+	</listitem>
+	<listitem>
+	  <para>[ nwid | domain ] off</para>
+	  
+	  <para>Set the Network ID (in some products it is also called
+	  Domain ID).  As all adjacent wireless networks share the
+	  same medium, this parameter is used to differentiate them
+	  (create logical  collocated  networks) and identify nodes
+	  belonging to the same cell.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>freq frequency</para>
+	</listitem>
+	<listitem>
+	  <para>channel number</para>
+	  
+	  <para>Set the operating frequency or channel in the
+	  device. Value below 1000 are the channel number, value over
+	  this is the frequency in Hz. You must append the suffix k, M
+	  or G to the value (for example, '2.46G' for 2.46 GHz
+	  frequency), or add enough '0'.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>sens value</para>
+  
+	  <para>Set the sensitivity threshold. This is the lowest
+	  signal level for which we attempt a packet reception, signal
+	  lower than this are not received. This is used to avoid
+	  receiving background noise, so you should set it according
+	  to the average noise level. Positive values are assumed to
+	  be the raw value used by the hardware or a percentage,
+	  negative values are assumed to be dBm.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>mode [ Managed | Ad-Hoc ]</para>
+  
+	  <para>Set the operating mode of the device, which depends on
+	  the network topology. The mode can be Ad-hoc (network
+	  composed of only one cell and without Access Point), Managed
+	  (node connects to a network composed of many Access Points,
+	  with roaming),</para>
+	</listitem>
+	
+	<listitem>
+	  <para>ap mac-address</para>
+	</listitem>
+	<listitem>
+	  <para>ap any</para>
+	</listitem>
+	<listitem>
+	  <para>ap off</para>
+	  
+	  <para>Force the card to register to the Access Point given
+	  by the address, if it is possible. When the quality of the
+	  connection goes too low, the driver may revert back to
+	  automatic mode (the card finds the best Access Point in
+	  range).</para>
+	</listitem>
+
+	<listitem>
+	  <para>nick name</para>
+	  
+	  <para>Set the nickname, or the station name. Most 802.11
+	  products do define it, but this is not used as far as the
+	  protocols (MAC, IP, TCP) are concerned and completely
+	  accessory as far as configuration goes.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>rate [ value [ auto ] ] | [ auto ]</para>
+	  
+	  <para>For cards supporting multiple bit rates, set the
+	  bit-rate in b/s.  The bit-rate is the speed at which bits
+	  are transmitted over the medium, the user speed of the link
+	  is lower due to medium sharing and overhead.  You must
+	  append the suffix k, M or G to the value (decimal multiplier
+	  : 10\^3, 10\^6 and 10\^9 b/s), or add enough '0'.  Values
+	  below 1000 are card specific, usually an index in the
+	  bit-rate list.  Use auto to select the automatic bit-rate
+	  mode.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>rts [ value | off ]</para>
+	  
+	  <para>RTS/CTS adds a handshake before each packet
+	  transmission to make sure that the channel is clear. This
+	  adds overhead, but increase performance in case of hidden
+	  nodes or large number of active nodes.  This parameters set
+	  the size of the smallest packet for which the node sends
+	  RTS, a value equal to the maximum packet size disables the
+	  scheme.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>frag [ value | off ]</para>
+	  
+	  <para>Fragmentation allows to split an IP packet into a
+	  burst of smaller fragments transmitted on the medium. In
+	  most cases this adds overhead, but in a very noisy
+	  environment this reduces the error penalty. This parameter
+	  sets the maximum fragment size.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>[ key | enc ] off | on</para>
+	</listitem>
+	<listitem>
+	  <para>[ key | enc ] key [ open | restricted ]</para>
+	  
+	  <para>Used to manipulate encryption or scrambling keys and
+	  security mode.</para>
+	  
+	  <para>To set the current encryption key, just enter the key
+	  in hex digits as XXXX-XXXX-XXXX-XXXX or XXXXXXXX. To create
+	  the hash out of a plain text passphrase the text must be
+	  prefixed with 's:'.</para>
+	  
+	  <para>'off' and 'on' disable and reenable encryption.</para>
+  
+	  <para>The security mode may be 'open' or 'restricted', and
+	  its meaning depends on the card used. With most cards, in
+	  open mode no authentication is used and the card may also
+	  accept non-encrypted sessions, whereas in restricted mode
+	  only encrypted sessions are accepted and the card will use
+	  authentication if available.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>power period value</para>
+	</listitem>
+	<listitem>
+	  <para>power value unicast</para>
+	</listitem>
+	<listitem>
+	  <para>power timeout value all</para>
+	</listitem>
+	<listitem>
+	  <para>power off</para>
+	</listitem>
+	<listitem>
+	  <para>power min period value [ max period value ]</para>
+	  
+	  <para>Used to manipulate power management scheme parameters
+	  and mode.  To set the period between wake up, enter period
+	  'value'.  To set the timeout before going back to sleep,
+	  enter timeout `value'.  You can also add the min and max
+	  modifiers. By defaults, those values are in seconds, append
+	  the suffix m or u to specify values in milliseconds or
+	  microseconds. Sometimes, those values are without
+	  units.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>txpower value</para>
+	</listitem>
+	<listitem>
+	  <para>txpower off | auto</para>
+  
+	  <para>For cards supporting multiple transmit powers, set the
+	  transmit power in dBm. If W is the power in Watt, the power
+	  in dBm is P = 30 + 10.log(W).  If the value is postfixed by
+	  mW, it will be automatically converted to dBm.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>retry value</para>
+	</listitem>
+	<listitem>
+	  <para>retry lifetime value</para>
+	</listitem>
+	<listitem>
+	  <para>retry min limit value [ max limit value ]</para>
+	  
+	  <para>Most cards have MAC retransmissions, and some allow to
+	  set the behaviour of the retry mechanism.  To set the
+	  maximum number of retries, enter limit `value'.  This is an
+	  absolute value (without unit).  To set the maximum length of
+	  time the MAC should retry, enter lifetime `value'.  By
+	  default, this value is in seconds, append the suffix m or u
+	  to specify values in milliseconds or microseconds.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>commit</para>
+	  
+	  <para>Some cards may not apply changes done through Wireless
+	  Extensions immediately (they may wait to aggregate the
+	  changes or apply it only when the card is brought up via
+	  ifconfig). This command (when available) forces the card to
+	  apply all pending changes. However, normally this is
+	  normally not needed.</para>
+	</listitem>
+      </itemizedlist>
+
+      </sect2>
+
+      <sect2 id="t2.conf.netconf.iptables">
+	<title>Keywords Recognized by the Iptables Module</title>
+	
+	<indexterm>
+	  <primary>iptables</primary>
+	</indexterm>
+	<indexterm>
+	  <primary>firewall</primary>
+	</indexterm>
+	
+	<para>The iptables module provides a simple firewall facility
+	using the recent Linux firewalling utility.</para>
+      
+      <itemizedlist>
+	<listitem>
+	  <para>accept ( all | ( tcp | udp ) port ) | ( ip addr )</para>
+	</listitem>
+	<listitem>
+	  <para>reject ( all | ( tcp | udp )  port ) | ( ip addr )</para>
+	</listitem>
+	<listitem>
+	  <para>drop ( all | ( tcp | udp )  port ) | ( ip addr )</para>
+	  
+	  <para>Add the given simple firewalling rules.</para>
+  
+	  <para>When there are any 'accept', 'reject' or 'drop'
+	  statements in an interface section, the iptables module
+	  automatically adds a chain named
+	  'firewall-<emphasis>ifname</emphasis>' to the iptables
+	  'filter' table and adds a jump to that chain into the
+	  'INPUT' chain using the incoming interface as condition. All
+	  'accept', 'reject' and 'drop' statements add rules to that
+	  chain.</para>
+  
+	  <para>Those statements are executed before the other
+	  statements in the interface section when setting up the
+	  interface and are executed after the other statements when
+	  shutting down the interface. When 'udp' or 'tcp' is used a
+	  port must be specified. A textual port description as
+	  specified in /etc/services, such as 'ssh' or 'http', is also
+	  possible.</para>
+  
+	  <para>'Accept', 'reject' and 'drop' directly links to the
+	  associated netfilter target.</para>
+  
+	  <para>When shutting down the interface, the chain
+	  'firewall-<emphasis>ifname</emphasis>' is simply flushed and
+	  removed from the iptables configuration.</para>
+	  
+	  <para>See <xref
+	  linkend="t2.config.netconf.examples.firewall"/> for example
+	  descriptions.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>masquerade</para>
+	  
+	  <indexterm>
+	    <primary>masquerade</primary>
+	  </indexterm>
+	  <indexterm>
+	    <primary>SNAT</primary>
+	  </indexterm>
+	  
+	  <para>Enable a special form of 'SNAT' (Source Network
+	  Address Translation) for use with dynamic dialup
+	  links.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>clamp-mtu</para>
+	  
+	  <para>Automatically clamp the MSS value to (path_MTU -
+	  40). Mostly for use with masqueraded Cable or DSL modem
+	  connections, where PPPoE (Point-to-Point-tunneling-Protocol
+	  over Ethernet) with the resulting loss of the effective MTU
+	  is used.</para>
+	</listitem>
+      </itemizedlist>
+      
+      </sect2>
+
+      <sect2 id="t2.config.netconf.ppp">
+	<title>Keywords Recognized by the PPP Module</title>
+	
+	<indexterm>
+	  <primary>PPP</primary>
+	</indexterm>
+
+	<para>The PPP module provides control over
+	Point-to-Point-tunneling-Protocol daemon.</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>ppp tty-name [ speed ] [ pppd-cmd-args ]</para>
+	  
+	  <para>The ppp keyword starts the configuration of pppd for
+	  use over the tty specified. Optionally the speed
+	  (e.g. 115200 for serial modem lines) and additional command
+	  line arguments for the pppd daemon can supplied.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>pppoe</para>
+  
+	  <para>The pppoe keyword enables the use of PPP over Ethernet
+	  for DSL or cable connections.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>ppp-defaults</para>
+	  
+	  <para>When ppp-defaults is specified reasonable default
+	  values are used for the ppp connection. The defaults are:
+	  noipdefault, noauth, hide-password, ipcp-accept-local,
+	  ipcp-accept-remote, defaultroute and usepeerdns - this will
+	  let the ppp daemon accept any IP address, set the default
+	  route, utilize the nameservers supplied by the peer.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>ppp-speed-defaults</para>
+	  
+	  <para>When this option is present additional defaults are
+	  used that are mostly used to improve speed and latency on
+	  fast links: default-asyncmap, noaccomp, nobsdcomp,
+	  nodeflate, nopcomp, novj, novjccomp and ktune. In addition
+	  lcp-echo-interval is set to 20 and lcp-echo-failure to
+	  3.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>chat-defaults</para>
+	  
+	  <para>The keyword initializes the use of a chat script to
+	  talk with a modem.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>chat-init</para>
+	  
+	  <para>With chat-init the modem init string can be supplied -
+	  for example: "at&amp;d2&amp;c1";</para>
+	</listitem>
+	
+	<listitem>
+	  <para>chat-dial</para>
+	  
+	  <para>Via chat-dial the modem dial sequence is set - for
+	  example: "atdt0192075"</para>
+	</listitem>
+	
+	<listitem>
+	  <para>ppp-on-demand idle-time-in-seconds</para>
+	  
+	  <para>Use of 'ppp-on-demand' configures on-demand connection
+	  initiation as with an idle time given as first
+	  argument.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>ppp-option all possible ppp options</para>
+	  
+	  <para>Via 'ppp-option' any pppd option can be specified,
+	  including the most important ones:</para>
+	  
+	  <itemizedlist>
+	    <listitem>
+	      <para>user username</para>
+	      <para>Specifies the username for authentication with the
+	      peer.</para>
+	    </listitem>
+	    
+	    <listitem>
+	      <para>password password</para>
+	      <para>Specifies the password for authentication with the
+	      peer.</para>
+	    </listitem>
+	    
+	    <listitem>
+	      <para>defaultroute</para>
+	      <para>Sets the system's default route to the remote peer
+	      address.</para>
+	    </listitem>
+	    
+	    <listitem>
+	      <para>usepeerdns</para>
+	      <para>Queries the peer for up to two DNS servers. Those
+	      are used to rewrite the resolver configuration in
+	      /etc/resolv.conf.</para>
+	    </listitem>
+	  </itemizedlist>
+	  
+	  <para>For the other, seldom used option, please refer to the
+	  pppd(8) man-page.</para>
+	  
+	  </listitem>
+	  
+      </itemizedlist>
+      
+      </sect2>
+
+      <sect2 id="t2.config.netconf.profiles">
+	<title>Profiles</title>
+	
+	<indexterm>
+	  <primary>profile</primary>
+	</indexterm>
+	
+	<para>Interface names in the 'auto' and the 'interface'
+	statement can be followed by a comma-separated list of profile
+	names in parentheses.</para>
+
+	<para>In case rocknet is executed with the 'auto' keyword as
+	interface, only those interfaces are used which do have the
+	current profile specified or no profile at all.</para>
+
+	<para>In case rocknet is executed with a real interface
+	specified, an interface section is used if it has no profile
+	specified or the current profile is given in the profile
+	list.</para>
+
+	<para>The current profile is stored in
+	/etc/conf/network-profile.</para>
+      
+      </sect2>
+      
+      <sect2 id="t2.config.netconf.examples">
+	<title>Configuration Examples</title>
+	
+	<para>This section present some examples to outline the
+	flexible configuration.</para>
+	
+	<sect3 id="t2.config.netconf.examples.basic">
+	  <title>Defining Wwo Interfaces and Enabling
+	  Forwarding</title>
+	  
+	  <para>Defining multiple interfaces and enabling forwarding
+	  between them is pretty easy:</para>
+
+<screen>auto eth0 eth1
+forward
+
+interface eth0
+        ip 192.168.1.1/24
+        ip 192.168.2.1/24
+
+interface eth1
+        ip 192.168.100.99/24
+        gw 192.168.100.1</screen>
+
+	</sect3>
+	
+	<sect3 id="t2.config.netconf.examples.firewall">
+	  <title>DHCP and Basic Firewalling</title>
+	  
+	  <para>Now we enable DHCP and add basic firewalling rules:
+
+<screen>auto eth0
+
+interface eth0
+        dhcp
+        script dyndns.sh         # update dyndns
+        accept ip 10.10.0.0/24   # office
+        accept ip 192.168.0.0/24 # home
+        accept tcp 80            # webserver is open
+        reject all</screen>
+
+          Via the script keyword we add a script to update the IP
+          address at the DynDNS service.</para>
+
+	</sect3>
+	
+	<sect3 id="t2.config.netconf.examples.profiles">
+	  <title>Introducing Profiles</title>
+	  
+	  <para>A more complex configuration introducing
+	  profiles. Here eth0 is specified to be automatically
+	  configured in any profile and eth1 will only be set up
+	  automatically on bootup when the office profile is active:
+
+<screen>
+auto eth0 eth1(office)
+
+interface eth0(home)
+        ip 192.168.69.15/24
+        nameserver 192.168.69.1
+        search localnet
+
+interface eth0(office)
+        allow ip 10.10.0.0/16 tcp ssh
+        reject all
+        dhcp
+
+interface eth1(office)
+        essid 'Blubb'
+        key 'I@mCo0l'
+        drop all
+        dhcp
+</screen>
+          </para>
+	  
+	</sect3>
+	
+	<sect3 id="t2.config.netconf.examples.pppoe">
+	  <title>DSL or Cable PPPoE Setups</title>
+
+	  <para>For use with DSL or cable modems a PPP configuration
+	  is needed.  Usually the following small configuration should
+	  be enough to configure such an network interface including
+	  masquerading and a tiny firewall rule (to drop all from the
+	  outer world):
+
+<screen>
+auto eth0 ppp0
+forward
+
+interface eth0
+        ip 192.168.1.1/24
+        accept tcp ssh
+        reject all
+
+interface ppp0
+        ppp eth1
+        pppoe options
+        ppp-defaults
+        ppp-option user "ISP-username"
+        ppp-option password "ISP-password"
+        clamp-mtu
+        masquerade
+        reject all
+
+</screen>
+
+          This will setup the PPP interface 'ppp0' using PPPoE over
+          the ethernet device 'eth1' with default values. The system's
+          default route will be adapted for the PPP connection and the
+          resolver file /etc/resolv.conf will be rewritten if the peer
+          yields DNS servers.</para>
+
+	</sect3>
+      </sect2>
+    
+    <sect2 id="t2.config.netconf.cmdline">
+      <title>Command-line Tools</title>
+      
+      <indexterm>
+	<primary>ifup</primary>
+      </indexterm>
+      <indexterm>
+	<primary>ifdown</primary>
+      </indexterm>
+      <indexterm>
+	<primary>ifswitch</primary>
+      </indexterm>
+      
+      <para>There are two simple command line tools:
+
+<screen>
+ifup interface [ profile ] [ -force ]
+ifdown interface [ profile ] [ -force ]
+ifswitch profile
+</screen>
+      </para>
+
+      <para>The first parameter is the name of the interface which
+      should be configured, the second parameter (which is optional)
+      is the profile name to be used while reading the
+      configuration. If the 2nd parameter is missing, the content of
+      /etc/conf/network-profile is used.  The new profile will be
+      automatically written into this file.</para>
+
+      <para>Per default the programs will only activate interfaces
+      that are not already marked active any only deactivate
+      interafesc that are marked active. If you need to overwrite this
+      behaviour use '-force'.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.netconf.tricks">
+      <title>Tricking With Pseudo Interfaces</title>
+
+      <para>It's possible to define non-existing interfaces such as
+      'firewall' in the configuration file. It would result to errors
+      if e.g. the 'ip' statement would be used in those interface
+      sections - but it is possible to use the 'script' statement in
+      those pseudo-interfaces to e.g. setup complex firewall using the
+      framework.</para>
+    </sect2>
+    
+    <sect2 id="t2.config.netconf.compat">
+      <title>Compatibility</title>
+      
+      <para>The program names ifup and ifdown are used on many
+      distributions as small helpers to set up or shut down interfaces
+      - and are already well known.</para>
+
+      <para>The file /etc/conf/network has a very similar 'feeling' as
+      Debian's /etc/network/interfaces and so it should be pretty easy
+      especially for Debian users to get used to T2 Linux based
+      distributions network configuration.</para>
+
+      <para>The whole network framework is very different from
+      RedHat's /etc/sysconfig/network/ and is also likely to be
+      different from whatever SuSE is using for the same
+      purpose.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="t2.config.nfs">
+    <title>NFS (Network File System)</title>
+    
+    <indexterm>
+      <primary>NFS</primary>
+    </indexterm>
+    
+    <para>NFS comes in handy when wanting to run a file system of a
+    remote host, for example to have all T2 tar-balls centrally
+    stored, or to save space during the build phase of T2 (the chroot
+    environment can work from a mounted file system).</para>
+
+    <sect2 id="t2.config.nfs.mounting">
+      <title>Mounting a NFS Export</title>
+      
+      <para>Make sure to have NFS compiled into the kernel (see <xref
+      linkend="t2.config.kernel"/>) in T2 Linux it is enabled by
+      default.</para>
+      
+      <para>Start up the portmapper and NFS on the server:
+
+<screen>
+rc portmap start
+rc knfsd start
+</screen>
+ 
+      Edit /etc/hosts.allow to allow for your client:
+
+<screen>
+portmap: clienthost
+</screen>
+
+      Add an NFS export entry to /etc/exports, for example:
+
+<screen>
+/mnt/data 192.168.2.4(ro,sync)
+/mnt/data localhost(rw,sync)
+</screen>
+
+      Re-export:
+
+<screen>
+exportfs -r
+</screen>
+
+      Mount the file system on the client (make sure portmap is running):
+
+<screen>
+mkdir /mnt/remote
+mount remotehost:/mnt/data /mnt/remote
+</screen>
+
+      Check the /var/log/messages file if you don't succeed.</para>
+      
+      <para>Note: NFS is quite fuzzy about DNS lookups. It is less
+      complicated to have static IP configuration for the
+      beginning.</para>
+    </sect2>
+  
+  <sect2 id="t2.config.cd-writing">
+    <title>CD-Writing</title>
+
+    <para>CD burning works very reliable - but IDE writers might need
+    some extra care to be usable.</para>
+
+    <para>Some years ago some people in the Linux community decided
+    that the SCSI layer should be the uniform layer to directly access
+    non-disk devices in Linux. So up-to Linux 2.6 you need an SCSI
+    emulation driver in order to access the IDE writer. Since the last
+    Linux 2.5 Linux kernels and an updated cdrecord it is possible to
+    access IDE writers directly without any need of SCSI emulation in
+    between.</para>
+  
+    <sect3 id="t2.config.cd-writing.driver">
+      <title>Which Driver to Use?</title>
+      
+      <indexterm>
+	<primary>ide-scsi</primary>
+      </indexterm>
+
+      <para>Most T2 Linux targets include the 'ide-scsi' driver
+      compiled into the 2.4 kernel and the native 'ide-cd' only
+      compiled as module. So as default the ide-scsi driver will be
+      used for CD drives. And you should not have any problem - and
+      skip the next paragraphs ...</para>
+
+      <para>If you have a kernel with 'ide-cd' complied in - or if you
+      only want to use the 'ide-scsi' module for the CD writer and the
+      'ide-cd' for the other normal CD drives for performance reasons
+      you need to tell the kernel to reserve the one IDE device for
+      the 'ide-scsi' module - otherwise it could not determine which
+      one it should prefer and just use the first match:
+      'ide-cd'.</para>
+
+      <para>The reservation is done via the kernel parameter
+      'hdc=ide-scsi' - where 'hdc' is the old-style name of the
+      device. The parser for this options is rather simple and DevFS
+      names - or other user-space mapped names - are not supported at
+      this early boot-up stage. To determine the old-style name the
+      files in /proc/ide/ or /usr/doc/linux24/devices.txt might be a
+      help.</para>
+    </sect3>
+    </sect2>
+
+    <sect2 id="t2.config.cd-writing.iso9660">
+      <title>How to Burn a Waw ISO 9660 Image?</title>
+      
+      <indexterm>
+	<primary>cdrecord</primary>
+      </indexterm>
+      
+      <para>The low-level tool to write ISO 9660 (CD) images is
+      cdrecord. Normally you want to specify at least the device node,
+      the speed, whether you want to blank a CD-RW and of course the
+      file to be written:
+
+<screen>
+cdrecord dev=/dev/scsi/host0/bus0/target0/lun0/generic \
+speed=8 t2-6.0.0-x86_cd1.iso
+</screen>
+
+      where 'dev=' specifies the generic SCSI device to use,
+      'blank=fast' would specify to blank a CD-RW (where 'fast' only
+      blanks as less as possible and e.g. 'all' would blank the whole
+      disc), '-v' would increase the verbosity to report more
+      information, 'speed=8' specifies the write speed to use and the
+      last parameter must be the image file to be written onto the
+      disc.</para>
+    </sect2>
+    </sect1>
+
+    <sect1 id="t2.cfengine">
+    <title>CFEngine - a Configuration Engine</title>
+    
+    <indexterm>
+      <primary>cfengine</primary>
+    </indexterm>
+
+    <para>While Cfengine has, by itself, little to do with T2 Linux it
+    is worth paying attention to in a post-installation
+    context.</para>
+
+    <para>T2 users update early and often and therefore find
+    themselves doing repetitious configuration work (system
+    administrators make a full-time job of it). Cfengine, created by
+    Mark Burgess, is a medicine against repetition.</para>
+
+    <para>You can set your system(s) up in such a way that you install
+    T2 Linux on a fresh partition, mount the Cfengine scripts and
+    reconfigure your machine(s) like before. Without manual
+    intervention. Interesting?</para>
+
+    <para>That is especially interesting when you have to administer
+    several machines.</para>
+
+    <para>This following subsection just give a quick overview. For
+    more information read the extensive information that comes with
+    the package (directory /opt/cfengine/share/cfengine/).</para>
+
+    <!-- The theory is that you can have a machine in an ideal state. -->
+
+    <para>Cfengine doesn't use if-then-else constructs. Logically
+    functionality is grouped in classes (e.g. lanserver, workstation,
+    laptop).</para>
+
+    <sect2 id="t2.config.cfengine.install">
+      <title>Install</title>
+      
+      <para>Cfengine comes as a T2 Linux extension package. Download
+      and build it:</para>
+
+<screen>
+scripts/Emerge-Pkg cfengine
+</screen>
+      
+    </sect2>
+    
+    <sect2 id="t2.config.cfengine.config">
+      <title>Cfengine Configuration</title>
+    </sect2>
+
+    <sect2 id="t2.config.cfengine.run">
+      <title>Run</title>
+      
+      <para>Run Cfengine:</para>
+      
+      <screen>
+cfengine -f /etc/cfengine/cfengine.conf -v -n
+</screen>
+      
+      <para>The -n option tells cfengine just to test the
+      water. Important in this testing phase!</para>
+    </sect2>
+    
+    <sect2 id="t2.config.cfengine.cron">
+      <title>Cron</title>
+      
+      <para>Once you are convinced your Cfengine configuration is sane
+      you can run it hourly using cron.</para>
+    </sect2>
+
+    </sect1>
+    
+   </chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+  -->

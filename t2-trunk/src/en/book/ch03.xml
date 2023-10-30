@@ -1,0 +1,141 @@
+<chapter id="t2.support">
+
+  <title>Hardware and Kernel Support</title>
+
+  <sect1 id="t2.support.linux">
+
+    <title>Linux</title>
+
+    <indexterm>
+      <primary>Linux</primary>
+    </indexterm>
+    
+    <para>In the beginning T2 was created to compile i386 GNU/Linux
+    specifically optimized for a given x86 CPU such as Intel's Pentium
+    or AMD's K6 to benefit as much of latest instruction extensions
+    the processor manufacturers integrated into their CPUs.</para>
+    
+    <para>As this goal was reached quickly - additional, more powerful
+    but also, at that time, harder to get architectures where
+    targeted: Alpha, PowerPC and SPARC. Later on UltraSPARC, MIPS,
+    MIPS64, HPPA eventually where adapted as their price dropped into
+    reasonable margins. Due to the flexibility of the scripted and
+    open build process IA-64 as well as x86-64 could be supported
+    immediately when they where introduced by their manufacturers. Just
+    the toolchain support patches had to be pulled in and all the
+    packages could be cross-compiled automatically.</para>
+  
+  </sect1>
+  
+  <sect1 id="t2.support.uclinux">
+    <title>uClinux</title>
+    
+    <para>Supporting the whole range of personal computer and
+    workstation platforms was just the beginning and the developers
+    set on to support the various CPUs used in embedded systems such
+    as: ARM, Motorola 68000, SuperH and the newer: AVR32, Blackfin
+    and Cris CPUs.</para>
+    
+    <indexterm>
+      <primary>MMU</primary>
+    </indexterm>
+    <indexterm>
+      <primary>uClinux</primary>
+    </indexterm>
+
+    <para>As some of the CPUs do not come with a Memory Management
+    Unit (MMU), support for the modified Linux variant named uClinux
+    supporting MMU-less architectures was added.</para>
+    
+    <indexterm>
+      <primary>RTAI</primary>
+    </indexterm>
+    <indexterm>
+      <primary>real-time</primary>
+    </indexterm>
+    
+    <para>Additionally add-on kernel patches such as RTAI for
+    real-time capability can optionally be enabled to be
+    applied.</para>
+
+    <para>With all the many volunteers and employees working and
+    contributing to Linux world-wide Linux is one of the most flexible
+    kernel to choose. Even in absence of a MMU it is capable of
+    running on a wide range of CPUs, supporting real-time requirements
+    and allows choosing from a great pool of different CPU
+    architectures to match exactly the performance and power
+    consumption requirements set by the target system
+    specification.</para>
+    
+  </sect1>
+  
+  <sect1 id="t2.support.minix">
+    <title>Minix</title>
+    
+    <indexterm>
+      <primary>Minix</primary>
+    </indexterm>
+    
+    <para>Despite Linux' strong support for various CPU architectures,
+    including MMU-less systems and real-time capabilities, as
+    monolithic design Linux is still kind of vulnerable <emphasis>at
+    least</emphasis> in regard of programming mistakes. For example
+    dereferencing bad pointers, out of bounds array access are able to
+    crash the whole kernel. Imperfect loop conditions, e.g. in
+    combination of unexpected hardware conditions can also result in
+    infinite loops and thus stall the whole system.</para>
+    
+    <para>This is where Minix as an open source implementation of
+    micro-kernel shines with self healing capabilities such as
+    reloading crashed or unresponsive driver processes.</para>
+    
+    <para>However at the time of writing Minix only supports x86 CPUs,
+    while ports to PowerPC and ARM are <emphasis>in
+    progress</emphasis>. The minimal size of the bare microsystem
+    kernel however could potentially decrease the amount of work
+    required for new architecture ports as well as the isolated driver
+    process model decrease the edit-compile cycle during device driver
+    development.</para>
+    
+  </sect1>
+  
+  <sect1 id="t2.support.others">
+    <title>Other Operating Systems</title>
+    
+    <para>Implementing support for other, open source operating
+    systems inside the T2 SDE is not that hard at all. As many of the
+    included packages are either plain ANSI C or C++ code that compile
+    on any system anyway, or the platform dependant bits are already
+    ported to the vast majority of systems adding a new OS kernel to
+    T2 comes down to:</para>
+    
+    <itemizedlist>
+      <listitem><para>adding a suitable "kernel header"
+      package</para></listitem>
+
+      <listitem><para>adding the matching C library)</para></listitem>
+      
+      <listitem><para>adding the matching C compiler (if any other
+      than GCC)</para></listitem>
+      
+      <listitem><para>adding the kernel packages
+      itself</para></listitem>
+      
+      <listitem><para>adding some definitions such as registration of
+      the kernel name to T2</para></listitem>
+
+      <listitem><para>adding other custom packages, e.g. for network
+      and firewall utilities, graphic subsystem packages et
+      al.</para></listitem>
+      
+    </itemizedlist>
+    
+  </sect1>
+  
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

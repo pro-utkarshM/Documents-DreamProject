@@ -1,0 +1,229 @@
+<chapter id="t2.target">
+  
+  <title>T2 Target Development</title>
+  
+  <indexterm>
+    <primary>target</primary>
+  </indexterm>
+  
+  <para>While T2 allows to build generic GNU/Linux distributions and
+  single packages, the most interesting thing is permanently storing
+  what and how to build it in so called targets.</para>
+
+  <para>A target, its definitions, code and patches lives in a
+  subdirectory named target/$targetname/. The clean separation from
+  the remaining build system allows creating dedicated backups,
+  storing the target files in some version control system and to share
+  it with co-workers or the public.</para>
+
+  <para>In T2 a target can control everything, starting with the
+  package selection, package configuration, individual custom
+  per-package patches, overlaying the build with predefined files at
+  the end of the build as well as how the final image should be
+  composited together. The overlaid files usually include custom
+  applications and setup scripts.</para>
+  
+  <para>But when we write a target can control
+  <emphasis>everything</emphasis> we really mean it: As one of the
+  very first code that is run when scripts/Build-Target is executed
+  is target/$targetname/build.sh the target could in (in theory) do
+  something entirely on its own and just loosely re-use some T2
+  functionality.</para>
+  
+  <para>To start your own target you need at least a build.sh, though
+  usually a config.in and pkgsel will control the basic
+  settings.</para>
+
+  <sect1 id="t2.target.from-scratch">
+    <title>A New Target From Scratch</title>
+    
+    <para>To start a new target just creating a new target directory
+    in target/ is enough
+
+<footnote><para>In former times a preconfig.in sniplet was required to
+register the target in the target list:
+<screen>CFGTEMP_TARGETLIST="$CFGTEMP_TARGETLIST xyz XYZ_Target"</screen>
+
+however since version 6.0 the targets are added to the list
+automatically.</para></footnote>.
+
+    As per default just the directory name is displayed as target
+    name, a more verbose name can be supplied in the config.in
+    files in a commented line starting with 'Description:', like:
+
+<screen>#Description: Wireless Router (work in progress!)</screen>
+    </para>
+
+    <para>Via the file config.in target specific options can be added
+    to the scripts/Config option menu, as well as other options
+    forced to specific values</para>
+
+<screen>SDECFGSET_PKGFILE_TYPE='none'
+SDECFGSET_IMAGE='livecd'
+
+# our embeddd SoC
+SDECFGSET_ARCH='x86'
+SDECFGSET_X86_OPT='i486'
+
+# space saving
+SDECFGSET_OPT='size'
+
+SDECFGSET_DO_REBUILD_STAGE=0</screen>
+
+    <!-- Explain the menu stuff and SDECFGSET as well -->
+    
+    <para>The package selection can be supplied by a rule file <!--
+    add referecne to explanation of the format -->, just named pkgsel
+    in the target directory:</para>
+
+<screen>O *
+X 00-dirtree
+X linux-header
+X linux26
+X binutils
+X gcc
+
+X uclibc
+X busybox
+
+# ...</screen>
+    
+    <para>Additionally the package selection can be altered by custom
+    code (such as sed expressions or Perl scripts) by calling the
+    pkgfilter function inside the config.in. <!-- TODO: explain that
+    advanced use--></para>
+
+    <para>Last but not least you need at least a build.sh as it
+    controls what to do when the target is built. Most targets
+    actually just want to inherit the whole T2 default code flow and
+    thus just 'source' the generic build.sh which iterates over all
+    packages to be built. The build.sh script also usually invokes
+    the output image post-processing at the end:</para>
+
+<screen>. target/generic/build.sh</screen>
+
+    <para>For how the generic target loops over all active packages
+    just take a look into the referenced file.</para>
+
+  </sect1>
+  
+  <sect1 id="t2.target.modifications">
+    <title>Per Package Modifications</title>
+    
+    <para>Inside a target it is easy to supply per package
+    modifications. Patches to the package's source code, such as new
+    features or fixes, can simply be dropped into the target directory
+    with the name pkg_$pkg.patch, for example
+    target/$targetname/pkg_apache.patch. As usually the patches will
+    be included in the package build and applied automatically by the
+    build system.</para>
+
+    <para>When you have to alter the package build further, for
+    example changing configure options, manipulate install paths and
+    so on, you can overwrite the package configuration file by
+    creating one named pkg_$pkg.conf in your target directory and
+    supply the required configuration options. However, if you want to
+    inherit the configuration as defined in the package itself you
+    have to source the files manually:</para>
+
+<screen># source the original file (if any)
+[ -e $confdir/$pkg.conf ] &amp;&amp; . $confdir/$pkg.conf
+
+# special adaptations for the XYZ target
+var_append confopt ' ' '--enable-some-fancy-feature'</screen>
+    
+    <para>Since this facility does not allow to alter the actual
+    version and download location of the package, since T2 version 7.0
+    it is furthermore possible to completely overlay and inherit
+    packages. This is usually useful if an architecture patch is only
+    available for a special GCC or Linux kernel release, or maybe even
+    so new to be a snapshot release. Also special requirements like an
+    older PHP, MySQL, Wine, etc. version due to incompatible features
+    in the current T2 version might be a reason to force a specific
+    <emphasis>known good or certified</emphasis> version in a
+    target.</para>
+    
+    <para>Defining a target specific version is identical to creating
+    a normal T2 package, but just inside a target's directory named
+    target/$targetname/package/$pkg, like
+    target/$targetname/package/apache/. Inside this directory the
+    normal files, such as $pkg.desc, $pkg.conf, and patches can be
+    placed. The exact semantic behaviour is:</para>
+
+    <itemizedlist>
+      <listitem><para>The .desc inherits everything from the main-tree
+      package/, so it is enough to just have [V] and [D] in this
+      overlay .desc.</para></listitem>
+      
+      <listitem><para>The .conf is completely inherited by default
+      from the main-tree package/ until another or empty one is create
+      it in this overlay package. To inherit parts the original one
+      can manually be sourced (source or . operator):</para>
+	
+<screen># inheritc the usual, default code-flow
+[ -e $base/package/*/$pkg/$pkg.conf ] &amp;&amp;
+. $base/package/*/$pkg/$pkg.conf</screen>
+      </listitem>
+
+      <listitem><para>patches are not inherited, because with
+      differing versions they usually do not apply anyway. If the
+      original patches are wanted, they can easily be added
+      to the patchfiles list:
+
+<screen>var_append patchfiles ' ' "ls$base/package/*/$pkg/*.patch"
+</screen></para></listitem>
+    </itemizedlist>
+    
+  </sect1>
+  
+  <sect1 id="t2.target.overlay">
+    <title>Root Filesystem Overlay</title>
+    
+    <indexterm>
+      <primary>rootfs</primary>
+    </indexterm>
+    
+    <para>Though most modifications can be done on the per-package
+    basis, some do not fit well into the packaging scheme. Notably
+    adding add-on scripts for the dedicated feature set, such as
+    setup, install, update, backup, ... specific for the actual
+    appliance product. Often even defining the actual product.</para>
+
+    <para>T2 allows to inject additional files into the systems root
+    filesystems (rootfs) for some output images being created, such
+    as an LiveCD. The to be injected files just have to placed in a
+    sub-directory named 'rootfs' inside the target directory:
+    target/$targetname/rootfs. The whole directory tree will be copied
+    into the final output images.</para>
+    
+    <indexterm>
+      <primary>#!</primary>
+    </indexterm>
+
+    <para>As some tweaks for the final target are modifications to
+    existing files, or files to be removed (for example due to space
+    constraints) special header codes are recognized to support
+    patching, removing files or changing the permission bits. These
+    codes mimic the classic Unix shebang ('#!') of scripts, just that
+    no absolute path follows the marker ('#!') in these T2 overlay
+    codes, but the action to perform, such as: '#!patch', ''#!chmod',
+    '#!chown', '#!rm', #!ln', and '#!cp'.</para>
+    
+  </sect1>
+
+  <simplesect>
+    <para>As creating a target from scratch can require quite some
+    knowledge about the packages and architecture in use, it is often
+    a big help to look into other existing targets, such as the
+    generic, desktop or embedded ones, for inspiration. One can even
+    base on an existing target and just copy a whole target and start
+    modifying after the custom needs.</para>
+  </simplesect>
+    
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

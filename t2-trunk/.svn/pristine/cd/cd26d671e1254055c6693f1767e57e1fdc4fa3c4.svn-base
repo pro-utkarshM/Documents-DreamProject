@@ -1,0 +1,182 @@
+<appendix id="t2.partition">
+
+<title>Partitioning Examples</title>
+
+<para>Since there are many partition-table layouts in the wild, the
+partitioning tools are architecture dependent.</para>
+
+<sect1 id="t2.partition.dos">
+<title>DOS Type Partition Table</title>
+
+<para>A DOS type partition table can describe an unlimited number of
+partitions.  In sector 0 there is room for the description of 4
+partitions (called 'primary'). One of these may be an extended
+partition; this is a box holding logical partitions, with descriptors
+found in a linked list of sectors, each preceding the corresponding
+logical partitions.  The four primary partitions, present or not, get
+numbers 1-4. Logical partitions start numbering from 5.</para>
+
+<indexterm>
+<primary>fdisk</primary>
+</indexterm>
+<indexterm>
+<primary>cdisk</primary>
+</indexterm>
+<indexterm>
+<primary>sdisk</primary>
+</indexterm>
+
+<para>There are several *fdisk programs around that can be used to access
+and modify the DOS type partition table. Each has its problems and
+strengths. You should choose them in the order parted, cfdisk,
+disk and sfdisk.</para>
+
+<para>Indeed, cfdisk is a beautiful program that has strict
+requirements on the partition tables it accepts, and produces high
+quality partition tables. Use it if you can. Fdisk is a
+buggy program that does fuzzy things - usually it happens to produce
+reasonable results.  Sfdisk is for hackers only.</para>
+
+</sect1>
+
+<sect1 id="t2.partition.apple">
+<title>Apple Partition Map</title>
+
+<para>The Apple disk partitioning scheme was developed in 1986. It
+attempted to be forward thinking as it was intended to handle drives
+of sizes up to several hundred megabytes. While the original intent
+was to handle various block sizes, in practice only 512 byte blocks
+are supported.  Since the various address fields are 32 bits unsigned
+this means the format can handle disks up to 2 Terabytes in size.</para>
+
+<indexterm>
+<primary>pdisk</primary>
+</indexterm>
+<indexterm>
+<primary>maf-fdisk</primary>
+</indexterm>
+
+<para>Under GNU/Linux mac-fdisk and pdisk can be used to manipulate an
+Apple partition map.</para>
+
+<para>For Linux installation on PowerPC you need an additional special
+<emphasis>bootstrap</emphasis> partition where the boot-loader will resist (the
+Macintosh Open-Firmware only boots from HFS partitions). The
+partitions can be really tiny, 800kB is the minimal size of an
+Macintosh partition.</para>
+
+<para>The basic commands in mac-fdisk are 'p' (print), 'd'
+(delete), 'c' (create), 'b' (bootstrap parition), 'w' (write) and 'q'
+(quit).</para>
+
+<sect2 id="t2.partition.apple.mac-fdisk">
+<title>Example Session With mac-fdisk</title>
+
+<para>When you install T2 Linux for the first time, you first need to delete
+the empty partition created MacOS X with 'd number'. Usually this is
+the last partitions before some possibly present free-space.</para>
+
+<para>First you should use 'p' (print) to get a list of the currently
+available partitions:
+
+<screen>
+/dev/hda
+Command (? for help): p
+/dev/hda
+    #                type name          length   base     ( size ) system
+part1 Apple_partition_map Apple             63 @ 1        ( 31.5k) Partition map
+part2           Apple_HFS Mac OS X    16777216 @ 64       (  8.0G) HFS
+part3           Apple_HFS Untitled 2      1600 @ 16777280 (  20.G) HFS
+
+Block size=512, Number of Blocks=58605120
+DeviceType=0x0, DeviceId=0x0
+</screen>
+
+The 'Untitled 2' partition must be deleted using the 'd' command:
+
+<screen>
+Command (? for help): d
+Partition number: 3
+</screen>
+
+</para>
+
+<para>The next step is to create the special bootstrap partitions with the
+minmal possible size mac-fdisk has a special command 'b'.
+So you only need to run the command 'b' and specify its start.</para>
+
+<para>As with all the create commands you need to specify a start. For such
+start and length specifications of partitions some different
+possibilities are available: either enter the real block number
+(difficult since you need to compute all the indexes yourself ...),
+the size in kB, MB, GB (only really useful to specify the length) or
+by using the boundaries of existing partitions using 'number P'.
+'Number' is usually the last partition containing the currently
+'free-space'.</para>
+
+<para>So for the bootstrap partition you usually need 'b 3P' to create the
+bootstrap partition at the beginning of the free-space partition 3:
+
+<screen>
+Command (? for help): b
+First block: 3P
+</screen>
+</para>
+
+<para>Now you can create the other 'normal' partitions for the swap-space,
+the '/' (root) file-system and optionally '/home', '/usr', ...
+partitions. You need the command 'c' (create) for this which asks for
+the start and length as well as a name. A possible scenario creating
+128 MB swap-space, a 5GB '/' and all the rest as '/home' partition:
+
+<screen>
+Command (? for help): c
+First block: 4P
+Length (in blocks, kB (k), MB (M) or GB (G)): 128M
+Name of partition: 'Linux swap'
+
+Command (? for help): c
+First block: 5P
+Length (in blocks, kB (k), MB (M) or GB (G)): 5GB
+Name of partition: 'Linux root'
+
+Command (? for help): c
+First block: 6P
+Length (in blocks, kB (k), MB (M) or GB (G)): 6P
+Name of partition: 'Linux home'
+</screen>
+
+The partition table now should look like:
+
+<screen>
+Command (? for help): p
+    #                type name          length   base     ( size ) system
+part1 Apple_partition_map Apple             63 @ 1        ( 31.5k) Partition map
+part2           Apple_HFS Mac OS X    16777216 @ 64       (  8.0G) HFS
+part3     Apple_Bootstrap bootstrap       1600 @ 16777280 (800.0k) NewWorld bootblock
+part4     Apple_UNIX_SVR2 Linux swap    262144 @ 16778880 (128.0M) Linux native
+part5     Apple_UNIX_SVR2 Linux root  10485760 @ 17041024 (  5.0G) Linux native
+part6     Apple_UNIX_SVR2 Linux home  31078336 @ 27526784 ( 14.8G) Linux native
+
+Block size=512, Number of Blocks=58605120
+DeviceType=0x0, DeviceId=0x0
+</screen>
+
+</para>
+
+<para>Now you should - if you are sure everything is ok - save the modified
+partition to the disk using 'w' (write) command and quit the program
+with 'q' to continue the installation.</para>
+
+<screen>
+Command (? for help): w
+The partition map has been saved successfully!
+Calling ioctl() to re-read partition table.
+Syncing disks.
+Command (? for help): q
+</screen>
+
+</sect2>
+</sect1>
+
+</appendix>

@@ -1,0 +1,983 @@
+<chapter id="t2.install">
+
+  <title>Installation</title>
+
+  <simplesect>
+    
+    <para>This subsection gives a brief overview over the installation
+    variants how to install T2 Linux on new machines.</para>
+    
+  </simplesect>
+  
+  <sect1 id="t2.install.optical">
+    <title>Optical Media (CD-ROM, DVD)</title>
+    
+    <para>If you have a CD-ROM or DVD drive this is by far the easiest
+    option. Burn an ISO image on the disk, configure the BIOS or
+    OpenFirmware to boot from CD and there you go.</para>
+    
+  </sect1>
+  
+  <sect1 id="t2.install.network">
+    <title>Network</title>
+    
+    <para>If your machine lacks an optical drive, e.g. rock-mounted,
+    headless pizza-sized servers, you likely want to network boot and
+    install via the network.</para>
+    
+    <para>Likewise, if you have some version of Linux already running
+    on the box, a free partition, and access to a network it is
+    straightforward to download the T2 Linux install program and the
+    binary tarballs from some source to avoid booting an optical media
+    just for the installation.</para>
+
+  </sect1>
+  
+  <sect1 id="t2.install.floppy">
+    <title>Floppy</title>
+    
+    <para>In case the machine is a bit older, there is no CDROM, nor
+    is a network boot option in the firmware, the only way to proceed
+    is by using good-old floppies.  Basically the idea is to get the
+    network to work and copy the files across (see <xref
+    linkend="t2.install.network"/>) - there are several
+    possibilities.</para>
+    
+    <sect2 id="t2.install.floppy.standard">
+      <title>Standard Boot/Root Floppies</title>
+
+      <para>Create a boot and root floppy using the images provided on
+      a T2 server (see <xref
+      linkend="t2.install.floppy.create"/>). Boot and cross your
+      fingers and hope the image provides support for your
+      hardware.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.floppy.boot-root">
+      <title>Create Boot/Root Floppies</title>
+
+      <para>If you use a non-mainstream network card or SCSI setup you
+      may need to build your own floppies. Just add additional kernel
+      options to the bootdisk target's kernel configuration or do
+      other custom modifications to the target. Basically you have to
+      create your own Linux kernel image (see <xref
+      linkend="t2.config.kernel"/>), supporting your hardware, and write
+      it onto the boot CD or floppy.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.floppy.create">
+      <title>Create a Single Boot/Root Floppy</title>
+      
+      <para>With some hardware (e.g. a USB floppy drive with faulty
+      BIOS) you may have to use a single floppy.</para>
+
+      <para>It is possible to create a boot/root floppy with, for
+      example, kermit - which allows transfers over serial
+      cable.</para>
+    </sect2>
+    
+  </sect1>
+  
+  <sect1 id="t2.install.hd">
+    <title>Hard Disk</title> 
+
+    <para>If you don't have a CDROM, network setup or floppy there are
+    not many options left.</para>
+
+    <para>One possibility is to use an hard disk drive and install T2
+    on it using another host. Make sure you understand master and
+    slave settings of IDE hard disks before you start off.</para>
+    
+  </sect1>
+  
+  <sect1 id="t2.install.classic">
+    <title>Classic, Textual Install</title> 
+    
+    <para>In this section you will find the information about a
+    classic, textual end-user installation.</para>
+    
+    <sect2 id="t2.instsall.classic.prepare">
+      <title>Preparing for an Installation</title>
+      
+      <para>After a successful build of T2, or after downloading a
+      prebuild ISO image it is time to install: burn the images onto
+      your optical media such as CD or DVD (see <xref
+      linkend="t2.build.iso"/>) and/or create the bootable
+      floppies.</para>
+
+      <para>It is perhaps also a good idea to make backups of the
+      partitions you intend to overwrite. The dd or cat in combination
+      with the gzip or bzip2 command can provide a compressed
+      byte-to-byte copy to another hard-disk or NFS mounted file
+      system.  For example:
+
+    <screen>
+cat /dev/disks/diskX/part1 > /mnt/net/diskX_part1.img.gz
+cat /dev/disks/diskX/part1 | gzip --fast > /mnt/net/diskX_part1.img.gz
+cat /dev/disks/diskX/part1 | gzip > /mnt/net/diskX_part1.img.gz
+cat /dev/disks/diskX/part1 | gzip --best > /mnt/net/diskX_part1.img.gz
+cat /dev/disks/diskX/part1 | bzip2 > /mnt/net/diskX_part1.img.bz</screen>
+
+      Which set of commands you want to use for the backup depends on
+      personal taste and the time and space requirements you have. From
+      the top down to the bottom, the listed commands with compression
+      require more time but the images consumes less disk space for
+      the backup file.</para>
+    
+      <para>A compromise is lzo compression in combination with the
+      lzop command line frontend, it compresses quite fast (usually
+      still I/O bound) but it is not necessarily available on every
+      rescue system.</para>
+
+      <para>If you are overwriting a system with a special system
+      configuration make notes on the existing installation,
+      especially regarding hardware settings in:
+
+
+    <itemizedlist>
+	  <listitem>
+	    boot loader configuration: lilo (/etc/lilo.conf), grub
+	    (/boot/grub/menu.lst), aboot (/etc/aboot.conf), silo
+	    (/etc/silo.conf), yaboot (/etc/yaboot.conf), ...</listitem>
+	  
+	  <listitem>X configuration (usually /etc/X11/)</listitem>
+	  
+	  <listitem>general T2 Linux system settings
+	    (/etc/conf)</listitem>
+	</itemizedlist>
+
+
+      which is often captured by just creating a backup of /etc and
+      /boot.</para>
+
+      <para>The way to boot the CDs depends on the
+      architecture:</para>
+    </sect2>
+    
+    <sect2 id="t2.install.classic.x86">
+      <title>CD-ROM Booting on x86</title>
+      
+      <indexterm>
+	<primary>BIOS</primary>
+      </indexterm>
+      
+      <para>For the x86 architecture you need to enable boot from a
+      CD-ROM in the BIOS. Often it is enabled by default, the CD just
+      boots when inserted.  The BIOS is usually reached by pressing
+      the <emphasis>del</emphasis> or <emphasis>Ctrl-ESC</emphasis>
+      key combination after power-on when the BIOS is executed - or
+      you might need to reach the SCSI Adapter's BIOS using a key
+      combination like <emphasis>Ctrl-A</emphasis>.</para>
+
+      <para>Latest EFI based Apple Macintosh Intel computers ship
+      without a BIOS and require holding down the
+      <emphasis>c</emphasis> or Option key while booting, see the next
+      PowerPC section for details.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.classic.ppc">
+      <title>CD-ROM Booting on PowerPC</title>
+      
+      <indexterm>
+	<primary>OpenFirmware</primary>
+      </indexterm>
+      <indexterm>
+	<primary>SMS</primary>
+      </indexterm>
+      
+      <para>On the Apple Macintosh PowerPC architecture you just need
+      to press the <emphasis>c</emphasis> key immediately during
+      power-on when the screen is black and the OpenFirmware is
+      executed. On newer machines (since around 2003) it is possible
+      to get a graphical boot chooser by pressing the Option key (also
+      known as 'fork' or 'alt' key). If you already are in the
+      OpenFirmware you can boot the CD by entering 'boot cd'.</para>
+
+      <para>When an existing MacOS should be dual-booted it is most
+      convenient to use the MacOS <emphasis>Disk Partition
+      Utility</emphasis> to either resize the MacOS partition size or
+      reinstall it if the Partition Utility does not support
+      resizing. (Make sure you de-select 'Install Mac OS 9 Disk
+      Drivers' if you do not want to waste extra disk-space and
+      partitions for them.)</para>
+
+      <para>On early IBM workstations (e.g. based on the Carolina
+      mainboard) you need to press <emphasis>F4</emphasis> to enter
+      the firmware(SMS).</para>
+
+      <para>For newer IBM server systems, like a RS/6000, you reach
+      the Open Firmware by pressing <emphasis>F8</emphasis> (or just
+      <emphasis>8</emphasis> on a serial terminal) after the self-test
+      completed. Just currently have to enter 'boot
+      cdrom:,\install.bin' in the OpenFirmware.</para>
+
+      <indexterm>
+	<primary>PPCbug</primary>
+      </indexterm>
+      <indexterm>
+	<primary>PowerPlus</primary>
+      </indexterm>
+      
+      <para>On Motorola embedded boards (sometimes referred to as
+      PowerPlus) you boot the first boot image at the PPCbug prompt
+      with 'pboot 0 41' (assuming the CDROM is at SCSI ID 4 - replace
+      the 4 with the SCSI ID of the CDROM if not). The second image
+      can be booted via 'pboot 0 42', and so on.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.classic.sparc">
+      <title>CD-ROM Booting on SPARC</title>
+      
+      <indexterm>
+	<primary>OpenFirmware</primary>
+      </indexterm>
+      
+      <para>On Sun Microsystem's SPARC systems you need to press
+      <emphasis>Stop-A</emphasis> to get to the OpenFirmware and enter
+      'boot cdrom'.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.floppy.bootable">
+      <title>Bootable Floppies</title>
+      
+      <para>The floppy images are in
+      configid/bootdisk/floppy*.img. These images can also be found on
+      some T2 mirrors. To copy the content to floppy-disks:
+
+    <screen>dd if=floppy1.img of=/dev/floppy/0  # or alternatively of=/dev/fd0
+dd if=floppy2.img of=/dev/floppy/0  # or alternatively of=/dev/fd0
+#...</screen>
+
+      (The Linux Boot-disk HOWTO might include more detailed
+      information. \cite{BootHowto}).</para>
+    </sect2>
+    
+    <sect2 id="t2.install.stage1">
+      <title>Boot (First Stage)</title>
+      
+      <para>The first output of the boot CD usually contains a
+      greeting and a prompt. At this prompt just pressing
+      <emphasis>enter</emphasis> usually results in the default kernel
+      to be boot up. Some other kernels or test-utilities may also be
+      present on the CD depending on the architecture (e.g. the
+      x86/x86-64 images include a System Memory test application named
+      memtest86).</para>
+
+      <para>After some initial kernel and ramdisk loading the first
+      stage loader needs to load the real (and bigger) T2 installer
+      from the media or network. Thus it tries to find optical media
+      first and usually no interaction is necessary. Only if a first
+      pass run is not able to find the second stage interaction is
+      required. An example probing is shown below:</para>
+
+      <screen>
+T2 SDE installer (1st stage - loader) ..
+
+The T2 install system boots up in two stages. You are now in the first stage
+and if everything goes right, you will not spend much time here. Just
+configure the installation source so the second stage boot system can be
+loaded and you can start the installation
+
+     0. Load second stage system from local device
+     1. Load second stage system from network
+     2. Configure network interfaces
+     3. Load kernel modules from this disk
+     4. Load kernel modules from another disk
+     5. Activate already formatted swap device
+     6. Run shell (for experts!)
+
+What do you want to do [0-6] (default=0)?
+
+Select a device for loading the second stage system from:
+
+     1. /dev/hdc SCSI or ATAPI CD-ROM
+
+Enter number or device file name (default=1):
+
+Select a second stage image file:
+
+     1. 2nd_stage
+     2. 2nd_stage_small
+
+Enter number or image file name (default=1):
+
+Using /dev/hdc: snd_stage
+Extracting second stage filesystem ...
+</screen>
+
+      <para>Since the second stage is loaded into the systems memory,
+      the small and feature-reduced '2nd_stage_small' is needed for
+      old system with less system memory.</para>
+
+<!-- TODO text how to small and network install-->
+    </sect2>
+    
+    <sect2 id="t2.install.stage2">
+      <title>Installation (Second Stage)</title>
+      
+      <para>The second stage will only ask about the terminal type to
+      use. Again, unless you are on a serial or network line you just
+      want to hit enter:
+
+<screen>
+T2 SDE installer (2nd stage) ...
+
+This is a small Linux distribution, loaded into your computer's memory.
+It has everything needed to install T2 Linux, restore an old installation
+or perform some administrative tasks.
+
+If you use a serial terminal, enter the names of terminal devices to use,
+for example '/dev/ttyS0' for the first serial port or just '/dev/console',
+just hit enter otherwise. (default=vc/1 vc/2 vc/3 vc/4 vc/5 vc/6):
+
+Just type 'stone' now, if you want to perform a normal installation of T2.
+</screen>
+
+      Now you already have a fully functional Linux system to your
+      fingertips, running from the systems RAM. It can be used for
+      rescue maintenance tasks and to install T2 now:
+<screen>
+stone
+</screen>
+
+        <indexterm>
+	  <primary>stone</primary>
+	</indexterm>
+
+      The installation is integrated into the T2 Linux Setup Tool One
+      (STONE), which is stared via the command stone.</para>
+
+    </sect2>
+
+    <sect2 id="t2.install.classic.partition">
+	<title>Partitioning the Hard-Drives</title>
+
+	<para>After asking for the keyboard layout the next screen
+	will let you repartition the hard-disk by selecting the disk
+	node and create file-systems or swap-space by selecting one of
+	the partitions.</para>
+
+	<para>Partitioning the hard drive is a matter of taste. It is
+	a good practice to have a partition with a basic bootable
+	Linux system - and a working bootloader (which is great if you
+	need something to fall back on). That can be very convenient
+	for performing maintenance tasks.  Some people like a small
+	/boot partition for their kernels or need this due to and odd
+	'1024 cylinder limitation' in older PC BIOSes, a partition for
+	swap space and a large partition for the rest.  Recommended
+	are:</para>
+	
+	<itemizedlist>
+	  <listitem>
+	    <para>Another Operating System's partitions</para>
+	    <para>Since other operating systems might have limitations
+	    to be only bootable from the first partition or the habit
+	    to wipe the systems boot-configuration or
+	    Master-Boot-Record, it is the easiest just to install them
+	    first.</para>
+	  </listitem>
+	  <listitem>
+	    <para>swap-space</para>
+	    <para>The 'swap-space' can be provided to allow the
+	    kernel to swap out pages of the system memory onto the
+	    hard-disk in order to provide more virtual memory then
+	    available as RAM inside the system.</para>
+	    <para>Size: For normal systems this is recommended and
+	    should be of the size: 2 x RAM - but does not need to
+	    exceed 256 MB. Since hard-disk are faster in the outer
+	    regions which is usually mapped to the beginning, the
+	    'swap-space' should be in the beginning of the disk for
+	    performance reasons.</para>
+	  </listitem>
+	  <listitem>
+	    <para>/</para>
+	    <para>The root partition where the system fits on.</para>
+	    <para>Size: Currently around 5GB for a complete
+	    installation with all provided packages.</para>
+	  </listitem>
+	  <listitem>
+	    <para>/home</para>
+	    
+	    <para>The partition containing the end user files and
+	    application settings. It is convenient to have the user
+	    data on a separate partition to make a future installation
+	    or update easier.</para>
+	    <para>Size: Normally all the empty space left.</para>
+	  </listitem>
+	</itemizedlist>
+
+	<para>Optional partitions include:</para>
+	
+	<itemizedlist>
+	  <listitem>
+	    <para>/boot</para>
+	    
+	    <para>Some people like to separate the boot loader and
+	    kernel images into an own partition. This might even be
+	    necessary for old x86 boxes where the BIOS can only access
+	    the first 1024 cylinders. On PowerPC systems with Yaboot
+	    as boot loader a '/boot' partition must not be used.</para>
+	    <para>This seperate partition might also be necessary
+	    if a filesystem such as Ext4, Reise4, etc. or LVM/RAID is
+            used which the boot-loader does not support to read.</para>
+	    <para>Size: Only a few MB are needed.</para>
+	  </listitem>
+	  <listitem>
+	    <para>a second /</para>
+	    <para> For rescue or maintenance purposes a second,
+            minimal installation can be considered.</para>
+	    <para>Size: Some hundred MB, depending on the rescue
+	    feature set.</para>
+	  </listitem>
+	</itemizedlist>
+
+	<para>For architecture dependent examples see Appendix <xref
+	linkend="t2.partition"/>. When you finished the partition of
+	the disk select 'Install the system ...'.  If you have trouble
+	in this phase you hopefully find help in section <xref
+	linkend="t2.install.trouble"/>.
+        </para>
+
+    </sect2>
+    
+    <sect2 id="t2.install.classic.source">
+      <title>Installation Source</title>
+      
+      <para>Now you can select an install source - usually a CD-ROM or
+      a network URL. For a normal installation the default values are
+      ok and you simply select 'Start gasgui Package Manager
+      (recommended)'.</para>
+
+      <indexterm>
+	<primary>gasgui</primary>
+      </indexterm>
+
+      <para>The installer will read the package database from the
+      installation source and present a list of profiles (e.g. minimal
+      or full workstation) with default package selections. You can
+      alter the list including using automated dependency
+      resolution.</para>
+
+      <!--more useage info for gasgui -->
+
+      <para>Selecting 'install' will extract all the package selected
+      and ask for the disk if a CD installation is performed. Make
+      sure you have your preferred tea, coffee of book handy.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.classic.post-install">
+      <title>Post Installation</title>
+      
+      <indexterm>
+	<primary>stone</primary>
+      </indexterm>
+      
+      <para>After the package extraction the STONE utility will lead
+      you through a number of questions like the root password,
+      keyboard mapping, language, hardware, network and offer you the
+      possibility to setup your favorite boot loader. Do not forget to
+      enable one of the boot-loaders if you want like to be able to
+      boot into the freshly installed system later.</para>
+
+      <para>You can rerun this setup anytime in your installed system
+      by executing stone.</para>
+
+      <para>If you want or need to perform other changes before the
+      first boot, you can do so by chroot-ing into the new target
+      system in /mnt/target:</para>
+
+<screen>
+chroot /mnt/target /bin/bash
+</screen>
+
+      <para>If the machine you are installing on has no monitor it may
+      be useful to set up serial support for the bootloader and init
+      (for more information see Appendix <xref
+      linkend="t2.serial.console"/>).</para>
+
+      <para>Cross fingers: Now you should be able to boot into your
+      freshly installed system. Unmount the file-systems and reboot
+      executing the minimalistic 'shutdown' present on the
+      install-system.</para>
+
+      <!-- TODO: example for manual umount -a ; reboot -f -->
+
+      <para>Since T2 Linux users like to keep their systems up-to-date
+      they usually make a copy of their <emphasis
+      role="bold">/etc</emphasis> and <emphasis
+      role="bold">/home</emphasis> directories and, with reasonable
+      efficiency, duplicate the older settings.</para>
+
+      <para>To automate rebuilding your configuration it is possible
+      to use Cfengine (the GNU Configuration Engine, see appendix
+      <xref linkend="t2.cfengine"/>).</para>
+
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.install.trouble">
+    <title>Troubleshooting</title>
+    
+    <para>If the boot procedure, from CDROM or floppy, stops along the
+    way you may have to rebuild the Linux kernel for your hardware
+    (see \cite{KernelHowto}).</para>
+
+    <para>An immediate halt after 'loading Linux kernel' usually
+    indicates your kernel has been built for the wrong CPU.</para>
+
+    <para>A 'can not load root' message indicates your kernel can not
+    find the root partition (common when moving to devfs). Indicate a
+    root partition at the boot prompt (see <xref
+    linkend="t2.config.boot.lilo"/>).</para>
+
+    <para>A 'can not find tty' message indicates the supplied root
+    partition hasn't got a proper /dev directory. This is usually
+    caused by a non-devfs /etc/fstab file. Mount /dev by supplying a
+    valid root path (of the /dev/ide or /dev/scsi type) and edit the
+    fstab file once booted.</para>
+
+    <para>A 'can not find root' kernel panic may imply are using a
+    SCSI adaptor for your HDD which has not been compiled into the
+    kernel or found in the init ramdisk.</para>
+
+    <para>And finally: if you don't have a CD drive and can't make an
+    NFS mount you can select to prepare an install with only some of
+    the tools mentioned above copied on the hard drive. Because T2 is
+    so transparent procedures like these have saved me in the
+    past!</para>
+
+    <sect2 id="t2.install.trouble.so">>
+      <title>Shared Libraries Error</title>
+      
+      <para>A error message like:
+
+<screen>
+shared libraries: /usr/lib/libshadow.so.0: undefined symbol: 
+libshadow_md5_crypt
+</screen>
+
+      usually indicates that a shared library another application or
+      library does depend on is not installed. You may have forgotten
+      to select the 'install unresolved dependencies' options during
+      the installation. You can fix this by simply running stone now
+      and select this option - it should install all the libraries
+      that are missing - or just install this package manually.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.trouble.lilo">
+      <title>LILO</title>
+      
+      <para>If, somehow, lilo is screwed and you can't boot into your
+      system the best option is to boot from floppy or CD, mount the
+      partition and run chroot:
+
+<screen>
+mount /dev/discs/disc0/part7 /mnt
+chroot /mnt /bin/bash --login
+</screen>
+
+      Edit /etc/lilo.conf and rerun lilo.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.trouble.out-of-space">
+      <title>Out of Disk Space</title>
+
+      <para>If your target partition is not large enough to do a full
+      T2 Linux install it is quite feasible to un-select a number of
+      packages.</para>
+
+      <para>Typically Mozilla, RFC's, GNOME or KDE are really large
+      package or package groups. Unselecting some of those will have
+      the largest impact.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.trouble.fontconfig">
+      <title>X Fontconfig Does Not Start</title>
+
+      <para>When the first application started in a X session, that
+      lookups installed fonts and metrics via font-config, takes a
+      long time to start, this is usually caused by an outdated
+      cache. Run /etc/cron.d/80-xfree86 as root to regenerate to
+      refresh the cache.</para>
+    </sect2>
+    
+    <sect2 id="t2.install.trouble.window-manager">
+      <title>X Has No Window Manager</title>
+
+      <para>The default window-manager can be selected in STONE. You
+      could export the WINDOW_MANAGER environment variable in your
+      ~/.profile like
+
+<screen>
+export WINDOW_MANAGER=blackbox
+</screen>
+
+      So blackbox becomes the window manager used for your personal X
+      session.</para>
+
+      <para>You could also run a graphical login manager like kdm, gdm
+      or xdm.  They can be enabled in STONE and allow a graphical
+      selection of the window-manager to use for each new
+      login-session.</para>
+      
+    </sect2>
+    
+  </sect1>
+  
+  <sect1 id="t2.install.exceptional">
+    <title>Exceptional Installation Methods (for Expert Use)</title>
+    
+    <para>Here we outline some exotic ways how to copy the build
+    output or installed system to another location including the
+    installation on other machine.</para>
+
+    <sect2 id="t2.install.extracting">
+      <title>Extracting the Boot-Disks to a Hard-Disk</title>
+      
+      <para>It is also possible to copy the cd-rom or floppy
+      distribution to a disk partition and boot into that for
+      installation.</para>
+
+      <para>For example untar the contained directories (on a newly
+      mounted partition):
+
+<screen>tar xvf 2nd_stage.tar.gz</screen>
+
+      Now you have a tiny rescue or install system as present on the
+      boot cd. You might like to modify your existing lilo.conf to
+      point to the new partition or chroot into it:</para>
+
+<screen>chroot .
+mount /dev
+mount /proc</screen>
+
+      <para>With extreme esoteric hardware you may have to install the
+      Linux kernel sources and recompile the kernel using the chroot
+      environment mentioned below.</para>
+
+      <para>Before rebooting from a changed lilo it is a good idea to
+      set the root password and create (and test) a rescue floppy for
+      your existing system. Or use one of the images from: <ulink
+      url="http://www.ibiblio.org/pub/Linux/system/recovery/!INDEX.html"/>
+      (see also \cite{BootHowto}). It is also possible to dd the
+      running kernel to a floppy and use rdev to set the root device
+      and specify other switches. It is suggested to test that floppy
+      on a system before running lilo!</para>
+
+      <para>Edit lilo.conf and run lilo (chroot'ed).</para>
+    </sect2>
+    
+    <sect2 id="t2.install.direct">
+      <title>Direct Installation</title>
+      
+      <para>Right after the build or on a binary CD/DVD distribution
+      you basically have all the built binary packages packed in tar
+      or GEM files. To install T2 Linux there is no real need to use
+      the install program! It is quite easily just to create a target
+      root directory (with or without NFS) and untar the packages you
+      really need. Just as fast and often just as handy:
+
+<screen>
+cd /mnt/target
+for file in  list-of-tars ; do
+  tar xvf $file
+done
+</screen>
+
+      Or you can use the mine (when you have the new T2 Linux GEM
+      files):</para>
+
+<screen>
+mine -i -v -R/mnt/target list-of-gem-files
+</screen>
+
+      <para>After a successful extraction it is the time to run some
+      post-install programs, setting up the network environment,
+      runlevels, services, X and other packages:
+
+<screen>
+chroot /mnt/target /bin/bash
+mount /dev
+mount /proc
+ldconfig
+for x in /etc/cron.daily/*; do $x; done
+source /etc/conf/devfs
+stone
+</screen>
+
+      Of course this way it is also possible to run T2 chroot'ed on
+      another distribution or a second T2 in T2.</para>
+      
+    </sect2>
+    
+    <sect2 id="t2.install.1:1.dd">
+      <title>1:1 Copy Using DD</title>
+
+      <indexterm>
+	<primary>dd</primary>
+      </indexterm>
+
+      <para>Once you have a binary image, or an installed T2 system,
+      you may want to deploy it across others.</para>
+
+      <para>Duplicating partitions can be done with dd:
+
+<screen>dd if=/dev/discs/disc0/part7 of=/dev/discs/disc0/part5</screen>
+
+      Mind, this destroys everything on the target device (part5 in
+      the above example). Be very careful in what you do here!</para>
+
+    </sect2>
+    
+    <sect2 id="t2.install.1:1.tar"> 
+      <title>1:1 Copy Using Tar</title>
+
+      <indexterm>
+	<primary>tar</primary>
+      </indexterm>
+
+      <para>A safer and more useful way - especially when the devices
+      or partitions differ in size - is to tar up the file system and
+      untar into the a new one. This way it is also possible to use
+      another filesystem on the target device (e.g. exT2 to ReiserFS
+      convertion):
+
+<screen>cd /
+echo 'dev
+proc
+sys
+mnt' > exclude.txt
+tar cp --exclude-from=exclude.txt . | (cd /mnt/target ; tar xpv)
+mkdir /mnt/target/{dev,proc,mnt}</screen>
+
+      </para>
+
+      </sect2>
+
+    <sect2 id="t2.install.1:1.rsync"> 
+      <title>1:1 Copy Using Rsync</title>
+
+      <indexterm>
+	<primary>rsync</primary>
+      </indexterm>
+
+      <para>The safest, easierst and often fastest method, if
+      available, to transfer a whole system is the rsync
+      program. Rsync i a remote synchronisation application designed
+      to transfer as few difference data as possible, and running it
+      is as simple as:
+
+<screen>rsync -axP / /mnt/target</screen>
+
+      Make sure to use the '-x' argument, as it prevents rsync from
+      tranferring the content of additionally mounted file-systems,
+      such as the virtual file-systems /dev, /proc, and /sys - but
+      also remote shared etc. are not synced. However to transfer
+      additional partitions mounted to /boot, /home and so on you need
+      to add them additionally.</para>
+
+      </sect2>
+    
+    <sect2 id="t2.install.bootable">
+      <title>Making it bootable</title>
+      
+      <para>Re-read section <xref linkend="t2.config.boot"/> for getting the
+      system ready to boot from the new partition.</para>
+      
+    </sect2>
+  
+  </sect1>
+  
+  <sect1 id="t2.package.management">
+
+  <title>Package management</title>
+
+  <para>Since T2 is build from source, you have two orthogonal and
+  nicely integrated methods to install or update package: using a
+  prepared binary package or build the package from source.</para>
+  
+  <sect2 id="t2.package.management.meta-data">
+    <title>Package meta-data</title>
+    
+    <indexterm>
+      <primary>var/adm</primary>
+    </indexterm>
+    
+    <para>Using the same T2 source revision there is no recognizable
+    difference between a binary package and one built from source. The
+    meta-data state stored in /var/adm is exactly the same and the
+    installation methods can - of course - be intermixed as needed.
+    Information are stored in ordinary, per package text files and
+    grouped into sub-directories as following:</para>
+
+    <itemizedlist>
+      <listitem>
+	<para>cache: the time the last build took, resulting files
+	count, size and dependencies</para>
+      </listitem>
+      <listitem>
+	<para>cksums: the package's files Unix checksum</para>
+      </listitem>
+      <listitem>
+	<para>dependencies: the detected build-time
+	dependencies</para>
+      </listitem>
+      <listitem>
+	<para>descs: a copy of the package's .desc file without
+	newlines</para>
+      </listitem>
+      <listitem>
+	<para>flists: the files installed by the packages</para>
+      </listitem>
+      <listitem>
+	<para>md5sums: the new-style package's files md4 checksum</para>
+      </listitem>
+      <listitem>
+	<para>packages: a human readable pretty print of the package
+	description and build-time metrics</para>
+      </listitem>
+      <listitem>
+	<para>parse-config: shell scripts included during the build
+	allowing installed packages to influence and configure the
+	build of packagesy</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>For the packages built from source there are additional
+    informations available:</para>
+  
+    <itemizedlist>
+      <listitem>
+	<para>backup: the backup of files that have been detected to
+	be modified</para>
+      </listitem>
+      <listitem>
+	<para>dep-debug: a list of utilized files and the associated
+	dependency</para>
+      </listitem>
+      <listitem>
+	<para>logs: the full build output created during the
+	build</para>
+    </listitem>
+      <listitem>
+	<para>olists: lists of files that have been in the package's
+	file list but have not been reinstalled during a rebuild and
+	thus could be considered obsolet / orphaned</para>
+      </listitem>
+    </itemizedlist>
+  </sect2>
+  
+  <sect2 id="t2.package.management.source">
+    <title>Installing or Updating a Package From Source</title>
+    
+    <indexterm>
+      <primary>mine</primary>
+    </indexterm>
+    <indexterm>
+      <primary>stone</primary>
+    </indexterm>
+    <indexterm>
+      <primary>gasgui</primary>
+    </indexterm>
+    
+    <para>Installing or updating a single package can be done using
+    the regular automated build system using Build-Pkg or
+    Emerge-Pkg, for example:</para>
+    
+<screen>scripts/Emerge-Pkg package</screen>
+
+    <para>This will build and install the package with its default
+    configuration in the current system's root. Optionally a different
+    root location can be specified with the argument '-root' or the
+    argument '-update' can be used to let the Build-System backup e.g.
+    modified configuration files and restore them after the
+    build. Section <xref linkend="t2.build.package.single"/> includes
+    more details about the two scripts.</para>
+  </sect2>
+  
+  <sect2 id="t2.package.management.mine">
+    <title>Installing or Updating a Binary Package</title>
+    
+    <para>The STONE utility also allows you to install/update or
+    remove packages using the same GUI as used during the
+    installation.  The gasgui which is executed from within the STONE
+    module uses the T2 mine.</para>
+
+    <para>If you want to manually extract files on a non-T2 system you
+    might need to install mine manually:</para>
+    
+    <indexterm>
+      <primary>mine</primary>
+    </indexterm>
+    <indexterm>
+      <primary>stone</primary>
+    </indexterm>
+    <indexterm>
+      <primary>gasgui</primary>
+    </indexterm>
+    
+<screen>tar xvf download/mirror/m/mine-$ver.tar.bz2
+cd mine-ver
+make USE_GAS=0</screen>
+
+    <para>Just running mine prints the usual usage information.</para>
+
+    <para>To install a gem package, specify the argument '-i' to
+    install the specified package. If you want to overwrite modified
+    files - e.g.  configuration files, specify the option '-f'
+    (force).</para>
+
+<screen>mine -i package.gem</screen>
+
+  </sect2>
+    
+  <sect2 id="t2.package.management.remove">
+    <title>Removing a Package</title>
+    
+    <para>To remove a package just use the mine with the argument
+    '-r'. It does not matter whether the package was built from source
+    or installed using mine since the two methods leave the same meta
+    information in the /var/adm package files.</para>
+
+<screen>mine -r package</screen>
+
+    <para>Another way is to use the information in /var/adm/flists
+    directly, for example:</para>
+
+<screen>cat /var/adm/flists/package | cut -d ' ' -f 2 | xargs rm -f</screen>
+
+    <para>Though you are advised to be very careful using this
+    example, since e.g. your modified files are removed and if your
+    system has evolved you might delete files you did not intend to
+    delete!</para>
+  </sect2>
+  
+  <sect2 id="t2.package.management.check">
+    <title>Consistency Checking of an Installed Package</title>
+    
+    <para>For maintenance or security reasons it might often be useful
+    the check the system files for modifications. The mine has an
+    option '-y' to check the checksum data in /var/adm/md5sum with the
+    file present in the system. If no package is given all packages
+    will be checked.</para>
+
+<screen>mine -y package
+mine -y # no argument to check all packages</screen>
+
+    <para>Also in this use case it is possible to use the /var/adm
+    data manually:</para>
+
+<screen>cd /
+md5sum --check /var/adm/md5sums/package | grep -v OK</screen>
+
+  </sect2>
+  
+  </sect1>
+    
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

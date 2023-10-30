@@ -1,0 +1,79 @@
+<appendix id="t2.serial.console">
+<title>Serial Console</title>
+
+<indexterm>
+<primary>serial console</primary>
+</indexterm>
+
+<para>When you have no keyboard/monitor connection to a box it can be
+useful to connect a serial cable and talk to the remote machine using
+minicom or kermit. This short appendix gives information how to
+connect to serial port 1 (COM1), also known as /dev/tts/0. The
+settings are 9600 bps, no parity, 8 bits.</para>
+
+<para>T2 Linux comes with serial support in the kernel.</para>
+
+<sect1 id="t2.serial.console.inittab">
+<title>Inittab</title>
+
+<para>
+Add the following line to the remote machine's /etc/inittab file:
+
+<screen>
+S1:12345:respawn:/sbin/agetty -L -i 9600 tts/0 vt100
+</screen>
+
+If your boot-loader offers serial terminal support, you might also
+want to setup serial terminal access at this early stage:</para>
+</sect1>
+
+<sect1 id="t2.serial.lilo">
+<title>Lilo</title>
+
+<para>For lilo you need to add the following line to /etc/lilo.conf
+and rerun lilo if you want remove access to lilo:
+
+<screen>
+serial=0,9600n8
+</screen>
+</para>
+
+</sect1>
+
+<sect1 id="t2.serial.grub">
+<title>Grub</title>
+
+<para>For grub you need to add the following lines to the
+/boot/grub/menu.lst:
+
+<screen>
+serial --unit=0 --speed=9600
+terminal serial
+</screen>
+</para>
+
+</sect1>
+
+<sect1 id="t2.serial.console.others">
+<title>Aboot, Silo and Yaboot</title>
+
+<para>Since on modern SPARC and PowerPC systems the OpenFirmware already
+includes serial terminal support, silo and yaboot should obtain the
+terminal from the OpenFirmware.</para>
+
+<para>On Alpha systems with SRM, aboot also inherits the console from
+the SRM.</para>
+
+<para>On such systems the serial console should work just out of the
+box.</para>
+</sect1>
+
+<sect1 id="t2.serial.console.connect">
+<title>Connect</title>
+
+<para>Reboot the remote machine, start minicom or kermit on the local box, set
+the right speeds and you should see LILO come up.
+</para>
+</sect1>
+
+</appendix>

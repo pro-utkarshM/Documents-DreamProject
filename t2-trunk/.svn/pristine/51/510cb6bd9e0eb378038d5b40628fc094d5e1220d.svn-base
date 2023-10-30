@@ -1,0 +1,314 @@
+<preface id="t2.preface">
+  <title>Preface</title>
+  
+  <simplesect id="t2.preface.intro">
+    
+    <para>This book is written to document the 7.0 series of the T2
+    System Development Environment (SDE), but is intended to be useful
+    for reference with earlier versions such as 6.0 and 2.1. Where
+    incompatible changes have been implemented we tried to outline
+    them.</para>
+
+  </simplesect>
+  
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="t2.preface.audience">
+
+    <title>Audience</title>
+    
+    <para>This book is written for computer-literate folk who want to
+    use T2 as operating system or system development environment for
+    custom Linux appliances - such as: router, firewall, network
+    attached storage (NAS), desktop, server or embedded boards and
+    products.</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="t2.preface.howread">
+    <title>How to Read this Book</title>
+
+    <para>This book aims to be useful to people of widely different
+    backgrounds&mdash;from people who only intend to install final
+    products based on T2, up to experienced system administrators,
+    system integrators and developers who need an inside into every
+    detail of the T2 environment. Depending on your own background,
+    certain chapters may be more or less important: While
+    administrators and developers might be most interested in quickly
+    getting to the details in <xref linkend="t2.build"/> and <xref
+    linkend="t2.inside"/>, end-users can rather skip over the T2
+    internals and start reading <xref linkend="t2.install"/> and <xref
+    linkend="t2.config"/>.</para>
+  
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="t2.preface.conventions">
+    <title>Conventions Used in This Book</title>
+    
+    <para>This section covers the various conventions used in this
+    book.</para>
+    
+    <!-- =============================================================== -->
+    <sect2 id="t2.preface.conventions.typo">
+      <title>Typographic Conventions</title>
+      
+      <variablelist>
+        
+        <varlistentry>
+          <term><command>Constant width</command></term>
+          <listitem>
+            <para>Used for commands, command output, and switches</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><replaceable>Constant width italic</replaceable></term>
+          <listitem>
+            <para>Used for replaceable items in code and text</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><filename>Italic</filename></term>
+          <listitem>
+            <para>Used for file and directory names</para>
+          </listitem>
+        </varlistentry>
+        
+      </variablelist>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="t2.preface.conventions.icons">
+      <title>Icons</title>
+
+      <note>
+        <para>This icon designates a note relating to the surrounding
+        text.</para>
+      </note>
+
+      <tip>
+        <para>This icon designates a helpful tip relating to the
+        surrounding text.</para>
+      </tip>
+
+      <warning>
+        <para>This icon designates a warning relating to the
+        surrounding text.</para>
+      </warning>
+    </sect2>
+
+    <para>Note that the source code examples are just
+    that&mdash;examples. While they should compile with the proper
+    compiler incantations, they are intended to illustrate the problem
+    at hand, not necessarily serve as examples of good programming
+    style.</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="t2.preface.organization">
+    <title>Organization of This Book</title>
+
+    <para>The chapters that follow and their contents are listed
+    here:</para>
+
+    <variablelist>
+      
+      <varlistentry>
+	<term><xref linkend="t2.intro"/></term>
+	<listitem>
+	  <para>Is a short introduction to T2.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.basics"/></term>
+	<listitem>
+	  <para>Covers the history of the T2 SDE as well as its
+	  features, architecture, components - a general overview and
+	  why it is different.</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+	<term><xref linkend="t2.support"/></term>
+	<listitem>
+	  <para>Is a short overview about the hardware architectures
+	  as well as the Operating Systems so far support by T2.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.build"/></term>
+	<listitem>
+	  <para>Outlines how to build your own flavour of T2 from the
+	  provided source code repository.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.inside"/></term>
+	<listitem>
+	  <para>Describes the internals of T2, the package
+	  descriptions, the build system, the configuration and all
+	  the details from a developer's point of view. It further
+	  demonstrates how to create new package as well as the
+	  automated build process in great detail. Followed by
+	  in-depth descriptions of the hooks and variables available to
+	  take over control.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.target"/></term>
+	<listitem>
+	  <para>Covers how to create custom targets, that is Linux
+	  solutions and appliances with T2. How to control all the
+	  details and permanently keep the configuration, cleanly
+	  separated from the remaining T2 source tree.</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+	<term><xref linkend="t2.install"/></term>
+	<listitem>
+	  <para>Walks through a classic, textual installation of an
+	  installable end-user T2 flavour as well as the LiveCD and
+	  gives some specific hints for embedded boards and the Wrt2
+	  wireless router.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.config"/></term>
+	<listitem>
+	  <para>Discusses the various configuration details, from CPU
+	  architecture dedicated boot loaders and their specific
+	  configuration settings over users and permissions to other
+	  every day preferences and tweaks.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.partition"/></term>
+	<listitem>
+	  <para>Describes the details of platform dependant
+	  partitioning and the related software tools.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><xref linkend="t2.serial.console"/></term>
+	<listitem>
+	  <para>Discusses how to use a serial console for headless
+	  servers and embedded boards (or just for debugging).</para>
+	</listitem>
+      </varlistentry>
+      
+    </variablelist>
+    
+  </sect1>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="t2.preface.free">
+    <title>This Book is Free</title>
+
+    <para>This book started out as bits of documentation written by
+    René Rebe, which were then gradually updated and enhanced
+    according to the changes and progress made in T2 as well as user
+    and developer feedback. As such, it has always been under a free
+    license.  (See <xref linkend="t2.copyright"/>.)  In fact, the
+    book was written in the public eye, as a part of T2. This means
+    two things:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>You will always find the latest version of this book in
+          the book's own Subversion repository.</para>
+      </listitem>
+
+      <listitem>
+        <para>You can distribute and make changes to this book however
+          you wish&mdash;its under a free license.  Of course,
+          rather than distribute your own private version of this
+          book, we'd much rather you send feedback and patches to the
+          Subversion developer community.  See <xref
+          linkend="t2.developer.contrib"/> to learn about joining this
+          community.</para>
+      </listitem>
+    </itemizedlist>
+    
+    <!-- O'Reilly Hardcopy Only
+    <para>You can send publishing comments and questions to O'Reilly
+      here: <remark>###insert boilerplate.</remark></para>
+    -->
+
+    <para>A relatively recent online version of this book can be found
+      at <ulink url="http://www.t2-project.org/documentation/"/>.</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="t2.preface.acks">
+    <title>Acknowledgments</title>
+
+    <para>This book would not be possible - nor very useful - if T2
+    did not exist. For that, the authors would like to thank Clifford
+    Wolf for starting ROCK Linux and all the countless people who
+    contributed to it and T2 over the last decade.</para>
+
+    <para>We also would like to thank all who contributed to this book
+    with informal reviews, suggestions, and fixes: While this is
+    undoubtedly not a complete list, this book would be incomplete and
+    incorrect without the help of: Lars Kuhtz, Valentin Ziegler, Urs
+    Pfister, and the entire T2 community.</para>
+    
+    <para>Special thanks to Ben Collins-Sussman, Brian W. Fitzpatrick,
+    and C. Michael Pilato for their outstanding XML Docbook setup as
+    created for the Subversion book, which is also used to transform
+    this book into the final PDF, PostScript(tm) and HTML form.</para>
+    
+    <para>We hope you find this book a joyful read. Joy and
+    collaboration is what made GNU/Linux great and it is in that
+    spirit T2 has been created and evolves!</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="t2.preface.acks.rene">
+      <title>From René Rebe</title>
+
+      <para>to be filled</para>
+
+    </sect2>
+
+    <sect2 id="t2.preface.acks.susan">
+      <title>From Susanne Klaus</title>
+
+      <para>to be filled</para>
+
+    </sect2>
+
+  </sect1>
+
+</preface>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

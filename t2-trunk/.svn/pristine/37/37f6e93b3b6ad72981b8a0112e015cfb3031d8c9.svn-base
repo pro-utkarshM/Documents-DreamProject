@@ -1,0 +1,2185 @@
+<chapter id="t2.inside">
+  <title>Inside T2</title>
+
+  <simplesect>
+    
+  <para>This chapter gives a quick run-through on the package system.
+  For the information that actually goes into a package - the
+  packaging - see <xref linkend="t2.package.desc"/>.</para>
+  
+  <para>T2 is built out of shell scripts. These scripts access the
+  files in config/ to build the packages from source.</para>
+  
+  <para>These scripts run with quite some environment variables being
+  set (see <xref linkend="t2.variable.environment"/>).</para>
+
+  <para>There will come a day when you want to contribute a package to
+  the T2 tree - because you find you are builting that package from
+  source every time you do a clean install.</para>
+
+  <para>Mastering the package system is a good idea if you deploy
+  similar configurations across machines. If that is your daily work
+  your job title may be 'system administrator'.</para>
+
+  <para>Packages usually get quickly accepted into the T2 SVN trunk
+  source tree and even if not local packages can still be
+  useful.</para>
+
+    </simplesect>
+
+  <sect1 id="t2.package">
+    
+  <title>A Package</title>
+    
+  <para>The T2 Linux package system is pretty straightforward and easy
+  to understand. Most users are system administrators and the choice
+  of bash over make should be considered pragmatic - shell scripts are
+  much easier to read, write and debug than Makefiles.  For the
+  functional parts Makefiles would include shell-scripts
+  anyway.</para>
+
+  <para>Packages are stored in a logical tree of repositories where
+  each package has its own directory. The package can be stored in
+  repositories according to its type (i.e. base, gnome2, powerpc) or
+  grouped by the maintainer.</para>
+  </sect1>
+
+  <sect1 id="t2.package.desc">
+    <title>Description File (.desc)</title>
+    
+    <indexterm>
+      <primary>.desc</primary>
+    </indexterm>
+    
+    <para>The build system created for T2 Linux needs some meta
+    information about each package in order to download and build it
+    but also textual information for the end-user. For maintenance
+    reasons we have chosen a tag based format in Text/Plain.</para>
+
+    <para>This section documents the t2.package.description tags
+    format. You can also add additional tags, their names have to
+    start with 'X-' (like [X-FOOBAR]).</para>
+
+    <para>Please use the tags in the same order as they are listed in
+    this table and add a blank line where a new table section
+    starts. Please use the X-* flags after all the other tags to
+    ensure best read-ability.  scripts/Create-DescPatch can help you
+    here.</para>
+    
+    <table id="t2.desc.tags.tbl-1">
+      <title>T2 .desc Tags</title>
+      <tgroup cols="4">
+	<thead>
+	  <row>
+	    <entry>short name</entry>
+	    <entry>long name</entry>
+	    <entry>mandatory</entry>
+	    <entry>multiple</entry>
+	  </row>
+	</thead>
+	
+	<tbody>
+	  <row>
+	    <entry></entry><entry>COPY</entry><entry>(x)</entry><entry>x</entry>
+	  </row>
+	  
+	  <row>
+	    <entry>I</entry><entry>TITLE</entry><entry>x</entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>T</entry><entry>TEXT</entry><entry>x</entry><entry>x</entry>
+	</row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>U</entry><entry>URL</entry><entry></entry><entry>x</entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>A</entry><entry>AUTHOR</entry><entry>x</entry><entry>x</entry>
+	  </row>
+	  <row>
+	    <entry>M</entry><entry>MAINTAINER</entry><entry>x</entry><entry>x</entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>C</entry><entry>CATEGORY</entry><entry>x</entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>F</entry><entry>FLAG</entry><entry></entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>R, ARCH</entry><entry>ARCHITECTURE</entry><entry></entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>K, KERN</entry><entry>KERNEL</entry><entry></entry><entry></entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>E, DEP</entry><entry>DEPENDENCY</entry><entry></entry><entry>x</entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>L</entry><entry>LICENSE</entry><entry>x</entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>S</entry><entry>STATUS</entry><entry>x</entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>V, VER</entry><entry>VERSION</entry><entry>x</entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>P, PRI</entry><entry>PRIORITY</entry><entry>x</entry><entry></entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>CV-URL</entry><entry></entry><entry></entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>CV-PAT</entry><entry></entry><entry></entry><entry></entry>
+	  </row>
+	  <row>
+	    <entry>CV-DEL</entry><entry></entry><entry></entry><entry></entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>O</entry><entry>CONF</entry><entry></entry><entry>x</entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>D, DOWN</entry><entry>DOWNLOAD</entry><entry></entry><entry>x</entry>
+	  </row>
+	  
+	  <!-- TODO: line -->
+	  
+	  <row>
+	    <entry>S, SRC</entry><entry>SOURCE</entry><entry></entry><entry></entry>
+	  </row>
+	  
+	</tbody>
+      </tgroup>
+    </table>
+    
+    <para>The meaning of all the different tags are:</para>
+    
+    <sect2 id="t2.package.desc.copyright">
+      <title>The File's Copyright</title>
+      
+      <indexterm>
+	<primary>[COPY]</primary>
+      </indexterm>
+      <para>[COPY]</para>
+      
+      <para>With the [COPY] tag the T2 SDE and probably additional
+      copyright information regarding the sources of this particular
+      package are added. The copyright text is automatically
+      (re-)generated by scripts/Create-CopyPatch from time to time,
+      preferably on each checkin of modified or new files.</para>
+      
+      <para>The automatically generated text is surrounded by
+      T2-COPYRIGHT-NOTE-BEGIN and T2-COPYRIGHT-NOTE-END - additional
+      lines containing the word 'Copyright' and additional information
+      around these tag stay untouched.</para>
+    </sect2>
+    
+    <sect2 id="t2.package.desc.info">
+      <title>The End-Uer Information</title>
+      
+      <indexterm>
+	<primary>[I]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[TITLE]</primary>
+      </indexterm>
+      
+      <para>[I] [TITLE]</para>
+      
+      <para>A short description of the package. Can be given only once.</para>
+      
+      <indexterm>
+	<primary>[T]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[TEXT]</primary>
+      </indexterm>
+      
+      <para>[T] [TEXT]</para>
+      
+      <para>A detailed package description. It can be used multiple
+      times to form a long text.</para>
+
+      <indexterm>
+	<primary>[U]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[URL]</primary>
+      </indexterm>
+      
+      <para>[U] [URL] http://foo.bar/</para>
+      
+      <para>A URL related to the package, for example the homepage. It
+      can be specified multiple times.</para>
+    </sect2>
+    
+    <sect2 id="t2.package.desc.responsible">
+      <title>Who is Responsible?</title>
+      
+      <indexterm>
+	<primary>[A]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[AUTHOR]</primary>
+      </indexterm>
+      
+      <para>[A] [AUTHOR] Rene Rebe &lt;rene@exactcode.de&gt; {Core Maintainer}</para>
+      
+      <para>The tag specifies the original author of the package. The
+      &lt;e-mail&gt; and the {description} are both optional. Normally
+      the main author should be listed, but multiple tags are
+      possible. To keep the file readable, not more then four tags
+      should be listed normally. At least one &lt;e-mail&gt;
+      specification should be present to make it easy to send patches
+      upstream.</para>
+
+      <indexterm>
+	<primary>[M]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[MAINTAINER]</primary>
+      </indexterm>
+      
+      <para>[M] [MAINTAINER] Rene Rebe &lt;rene@exactcode.de&gt;</para>
+      
+      <para>Same format as [A] but contains the maintainer of the
+      package.</para>
+    </sect2>
+    
+    <sect2 id="t2.package.desc.version">
+      <title>The Version, State and Other Build Details</title>
+
+      <indexterm>
+	<primary>[C]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[CATEGORY]</primary>
+      </indexterm>
+      
+      <para>[C] [CATEGORY] console/administration x11/administration</para>
+      
+      <para>The categories the package is sorted into. A list of
+      possible categories can be found in the file
+      PKG-CATEGORIES.</para>
+
+      <indexterm>
+	<primary>[F]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[FLAG]</primary>
+      </indexterm>
+      
+      <para>[F] [FLAG] DIETLIBC</para>
+      
+      <para>Special flags to signal special features or build-behavior
+      for the build-system.  A list of possible flags can be found in
+      the file PKG-FLAGS.</para>
+
+      <indexterm>
+	<primary>[R]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[ARCH]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[ARCHITECTURE]</primary>
+      </indexterm>
+      
+      <para>[R] [ARCH] [ARCHITECTURE] + x86</para>
+      <para>[R] [ARCH] [ARCHITECTURE] - sparc powerpc</para>
+      
+      <para>Usually a package is built on all architectures. If you are
+      using [R] with '+' the package will only be built for the given
+      architectures.  If you use it with '-' it will be built for all
+      except the specified architectures.</para>
+
+      <indexterm>
+	<primary>[K]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[KERN]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[KERNEL]</primary>
+      </indexterm>
+      
+      <para>[K] [KERN] [KERNEL] + linux</para>
+      <para>[K] [KERN] [KERNEL] - minix</para>
+      
+      <para>Usually a package is built on all kernels. If you are using
+      [K] with '+' the package will only be built for the given
+      kernel. If you use it with '-' it will be built for all except
+      the specified kernels.</para>
+
+      <indexterm>
+	<primary>[E]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[DEP]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[DEPENDENCY]</primary>
+      </indexterm>
+      
+      <para>[E] [DEP] [DEPENDENCY] group compiler</para>
+      <para>[E] [DEP] [DEPENDENCY] add x11</para>
+      <para>[E] [DEP] [DEPENDENCY] del perl</para>
+      
+      <para>When the keyword 'group' is specified all dependencies to
+      a package in this group (compiler in the example) will get
+      expanded to dependencies to all packages in this group.</para>
+
+      <para>The keywords 'add' and 'del' can be used to add or delete
+      a dependency that can not be detected by the build-system
+      automatically. E.g. a font package extracts files into a x11
+      package's font directories.  Since the font package does not use
+      any x11 package's files it does not depend on the package
+      automatically and the dependency must be hard-coded. Use with
+      care and only where it is really, REALLY, necessary.</para>
+
+      <indexterm>
+	<primary>[L]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[LICENSE]</primary>
+      </indexterm>
+
+      <para>[L] [LICENSE] GPL</para>
+      
+      <para>This tag specifies the license of the package. Possible
+      values can be found in misc/share/REGISTER.</para>
+
+      <indexterm>
+	<primary>[S]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[STATUS]</primary>
+      </indexterm>
+      
+      <para>[S] [STATUS] Stable</para>
+      
+      <para>where 'Stable' also can be 'Gamma' (very close to stable),
+      'Beta' or 'Alpha' (far away from stable).</para>
+
+      <indexterm>
+	<primary>[V]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[VER]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[VERSION]</primary>
+      </indexterm>
+      
+      <para>[V] [VER] [VERSION] 2.3 19991204</para>
+      
+      <para>Package version and optional revision.</para>
+
+      <indexterm>
+	<primary>[P]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[PRI]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[PRIORITY</primary>
+      </indexterm>
+      
+      <para>[P] [PRI] [PRIORITY] X --3-5---9 010.066</para>
+      
+      <para>The first field specifies if the package should be built
+      on default or not (X=on, O=off). The second and third field
+      specify the stages and build-order for that package.</para>
+      
+      <para>See <xref linkend="t2.build-stages"/> and <xref
+      linkend="t2.build-priority"/> for a detailed explanation.</para>
+    </sect2>
+    
+    <sect2 id="t2.package.desc.other">
+      <title>Other Tunable Details</title>
+      
+      <indexterm>
+	<primary>[CF-URL]</primary>
+      </indexterm>
+
+      <para>[CV-URL] http://www.research.avayalabs.com/project/libsafe/</para>
+      
+      <para>The URL used by scripts/Check-PkgVersion.</para>
+      
+      <indexterm>
+	<primary>[CF-PAT]</primary>
+      </indexterm>
+
+      <para>[CV-PAT] ^libsafe-[0-9]</para>
+      
+      <para>The pattern used by scripts/Check-PkgVersion.</para>
+      
+      <indexterm>
+	<primary>[CF-DEL]</primary>
+      </indexterm>
+      
+      <para>[CV-DEL] \.(tgz|tar\.gz)$</para>
+      
+      <para>The delete pattern for scripts/Check-PkgVersion.</para>
+      
+      <indexterm>
+	<primary>[O]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[CONF]</primary>
+      </indexterm>
+      
+      <para>[O] [CONF] srcdir="$pkg-src-$ver"</para>
+      
+      <para>The given text will be evaluated as if it would be at the
+      top of the package's *.conf file.</para>
+    </sect2>
+    
+    <sect2 id="t2.package.desc.download">
+      <title>Where Does the Package Source Come From?</title>
+      
+      <indexterm>
+	<primary>[D]</primary>
+      </indexterm>
+      <indexterm>
+<primary>[DOWN]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[DOWNLOAD]</primary>
+      </indexterm>
+      
+      <para>[D] [DOWN] [DOWNLOAD] cksum foo-ver.tar.bz2 http://the-site.org/</para>
+      <para>[D] [DOWN] [DOWNLOAD] cksum foo-ver.tar.bz2 !http://the-site.org/foo-nover.tar.bz2</para>
+      <para>[D] [DOWN] [DOWNLOAD] cksum foo-ver.tar.bz2 cvs://:pserver:user@the-site.org:/cvsroot module</para>
+      
+      <para>Download the specified file using the URL obtained by
+      concatenation of the second (file) and third (base URL)
+      fields. If the checksum is specified (neither '0' nor 'X') the
+      downloaded file is checked for correctness. The download URL is
+      split like this, because the first filename is also used for T2
+      mirrors and checkouts from version controls systems need a
+      target tar-ball name.</para>
+      
+      <para>The checksum can initially be '0' for later generation or
+      'X' to specify that the checksum should never be generated nor
+      checked, for example due to checkouts from version control
+      systems.</para>
+
+      <para>When a '!' is specified before the protocol a full URL
+      must be given and is used, but the obtained content is rewritten
+      to the filename specified in the second, filename field. This is
+      useful to add a version to unversioned files or just to give
+      filenames a better meaning and avoid conflicts.</para>
+      
+      <indexterm>
+	<primary>ftp://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>http://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>https://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>cvs://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>svn://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>svn+http://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>svn+https://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>git://</primary>
+      </indexterm>
+      <indexterm>
+	<primary>!</primary>
+      </indexterm>
+
+      <para>Aside the normal ftp://, http:// and https:// protocols,
+      cvs://<footnote><para>The cvs:// support was revisited in T2
+      2.1, previously it was more cryptic and error-prone to
+      use.</para></footnote>, svn://, svn+http://, svn+https:// as
+      well as git:// are supported at the time of writing.</para>
+
+      <para>The package maintainer can use scripts/Create-CkSumPatch
+      to generate the checksum if it is initially set to 0 and
+      downloaded, like:</para>
+
+<screen>scripts/Create-CkSumPatch xemacs
+patch -p1 &lt; cksum.patch</screen>
+
+      <para>or in short just:</para>
+
+<screen>scripts/Create-CkSumPatch xemacs | patch -p1</screen>
+
+      <indexterm>
+	<primary>[SRC]</primary>
+      </indexterm>
+      <indexterm>
+	<primary>[SOURCEPACKAGE]</primary>
+      </indexterm>
+      
+      <para>[SRC] [SOURCEPACKAGE] pattern1 pattern2 ...</para>
+      
+      <para>This will enable build_this_package function to build the
+      content of more than one tarball, all those files matching the
+      patterns. Do not put the extension of the tarballs (e.g.
+      tar.gz) into this tag, as it might be transformed to .bz2 by the
+      build system automatically! A pattern to match the needed
+      tarball is enough, for example:
+
+<screen>[SRC] mypkg-version1 gfx
+[D] cksum mypkg-version1.tar.gz http://some.url.tld
+[D] cksum mypkg-gfx-version2.tbz2 http://some.url.tld
+[D] cksum mypkg-data-version3.tar.bz2 http://some.url.tld</screen>
+
+      This would run the whole build cycle with mypkg-version1.tar.bz2
+      and mypkg-gfx-version2.tbz2 but not with
+      mypkg-data-version3.tar.bz2. As the parameter are patterns to
+      match, a simple '.' is enough to match all specified download
+      files.</para>
+
+<screen>
+[COPY] --- T2-COPYRIGHT-NOTE-BEGIN ---
+[COPY] This copyright note is auto-generated by scripts/Create-CopyPatch.
+[COPY]
+[COPY] T2 SDE: package/.../python/python.desc
+[COPY] Copyright (C) 2004 - 2006 The T2 SDE Project
+[COPY] Copyright (C) 1998 - 2004 ROCK Linux Project
+[COPY]
+[COPY] More information can be found in the files COPYING and README.
+[COPY]
+[COPY] This program is free software; you can redistribute it and/or modify
+[COPY] it under the terms of the GNU General Public License as published by
+[COPY] the Free Software Foundation; version 2 of the License. A copy of the
+[COPY] GNU General Public License can be found in the file COPYING.
+[COPY] --- T2-COPYRIGHT-NOTE-END ---
+
+[I] The Python programming language
+
+[T] Python is an interpreted object-oriented programming language, and is
+[T] often compared with Tcl, Perl, Java or Scheme.
+
+[U] http://www.python.org/
+
+[A] Stichting Mathematisch Centrum, Amsterdam, The Netherlands
+[M] Rene Rebe &lt;rene@t2-project.org&gt;
+
+[C] base/development
+
+[L] OpenSource
+[S] Stable
+[V] 2.5
+[P] X -----5---9 112.000
+
+[D] 4007565864 Python-2.5.tar.bz2 http://www.python.org/ftp/python/2.5/
+</screen>
+      
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.package.conf">
+    <title>Configuration File (.conf)</title>
+    
+    <indexterm>
+      <primary>.conf</primary>
+    </indexterm>
+    
+    <para>The configuration file gets executed during build time. The
+    build system is pretty smart - for a lot of standard compiles
+    it is not necessary to write such a build script. Additionally
+    standard and cross-compilation switches get passed on to
+    configure, make, gcc and friends automatically. Only if
+    modifications to this automatically detected values are needed, a
+    .conf file needs to be created.</para>
+    
+    <para>Since the possibilities in .conf files have no limits
+    please refer to the <xref linkend="t2.variable.environment"/> and
+    later sections.</para>
+
+<screen>
+# --- T2-COPYRIGHT-NOTE-BEGIN ---
+# This copyright note is auto-generated by scripts/Create-CopyPatch.
+# 
+# T2 SDE: package/.../python/python.conf
+# Copyright (C) 2004 - 2006 The T2 SDE Project
+# Copyright (C) 1998 - 2004 ROCK Linux Project
+# 
+# More information can be found in the files COPYING and README.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 2 of the License. A copy of the
+# GNU General Public License can be found in the file COPYING.
+# --- T2-COPYRIGHT-NOTE-END ---
+
+python_postmake() {
+        cat &gt; $root/etc/profile.d/python &lt;&lt;-EOT
+                export PYTHON="$root/$prefix/bin/python"
+EOT
+}
+
+runpysetup=0
+
+var_append confopt " " "--enable-shared --with-threads"
+</screen>
+
+  </sect1>
+  
+  <sect1 id="t2.package.patch">
+    <title>Patch Files (.patch)</title>
+    
+    <indexterm>
+      <primary>.patch</primary>
+    </indexterm>
+    
+    <para>Patch files are stored with the postfix .patch in the
+    package directory and are applied automatically during the package
+    build.</para>
+
+    <para>There are a few ways to control applying patches
+    conditionally by adding an additional extension:</para>
+    
+    <itemizedlist>
+      <listitem><para>.patch.cross</para>
+	<para>Patches with .patch.cross are only applied in the cross
+	compile stages 0 and 1.</para>
+      </listitem>
+      <listitem><para>.patch.cross0</para>
+	<para>Patches with .patch.cross0 are only applied in the
+        toolchain stage 0.</para>
+      </listitem>
+      <listitem><para>.patch.$arch</para>
+	<para>Patches with .patch.$arch, are only applied when compiled
+	for the CPU architecture matching $arch.</para>
+      </listitem>
+      <listitem><para>.patch.$xsrctar</para>
+	<para>Useful for packages with multiple tarballs, as it allows
+	matching patches to the individual files. Patches matching the
+	beginning of the extracted source package filename are
+	applied.</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>If more sophisticated conditional control is needed for a
+    patch, it can be named completely differently, such as .diff or
+    .patch.manual, and dynamically injected to the patchfiles variable
+    in the package's .conf:</para>
+    
+    <screen>if condition; then
+    var_append patchfiles $confdir/something.diff
+fi</screen>
+    
+  </sect1>
+  
+  <sect1 id="t2.package.cache">
+    <title>Cache File (.cache)</title>
+    
+    <indexterm>
+      <primary>.cache</primary>
+    </indexterm>
+    
+    <para>The .cache file holds automatically generated information
+    about the package such as dependencies, build time, files, size
+    ...</para>
+
+    <para>Packages committed to the T2 Linux source tree get build on
+    a regular basis on test systems by the tree maintainer.  For each
+    of such regression tests a .cache file is generated and placed
+    into the package directory. When the package failed this is marked
+    in the file and the tail of the ERROR-LOG is also inserted. The
+    main use of a cache file during the build process is to resolve
+    dependencies and to queue the packages during a
+    Cluster-Build. Cache file can look like this:</para>
+
+<screen>
+[TIMESTAMP] 1133956688 Wed Dec  7 12:58:08 2005
+[BUILDTIME] 80 (9)
+[SIZE] 47.48 MB, 4326 files
+
+[DEP] bash bdb bdb33 binutils bluez-libs bzip2 coreutils
+[DEP] diffutils findutils gawk gcc gdbm glibc grep
+[DEP] libx11 linux-header make mktemp ncurses net-tools
+[DEP] openssl patch readline sed sysfiles tar tcl
+[DEP] tk util-linux xproto zlib
+</screen>
+
+    <para>The dependencies included in the .cache file are only the
+    direct or explicit dependencies of this single package. The
+    recursive, indirect or implicit dependencies of the packages'
+    dependencies are generated on the fly in e.g. Create-PkgQueue or
+    Emerge-Pkg.</para>
+
+    <para>When 'Disable packages which are marked as broken' is
+    selected in the config, a package will not be built if a .cache
+    file does not exist, or indicates an error.</para>
+  </sect1>
+  
+  <sect1 id="t2.package.creation">
+    <title>Package Creation in Practice</title>
+    
+    After all the possible details of packages in mind its now
+    time to actually create a new package:</sect1>
+  
+      <para>To get a grip on how the Build scripts work the best thing
+    to do is take one of the smaller standard packages and build them
+    by hand. Start changing parameters and see what happens in
+    /var/adm/logs and the src.* trees.</para>
+
+<screen>scripts/Build-Pkg package</screen>
+
+    <para>By studying existing config files you'll find there are a
+    number of interesting features.</para>
+
+    <para>Many standard <emphasis>configure</emphasis> type build
+    doesn't even need scripting.  T2 does that all for you.</para>
+
+    <para>When packages need special configuration parameters or
+    command sequences write them directly into the shell
+    script.</para>
+    
+    <sect1 id="t2.package.desc.preparing">
+      <title>Preparing</title>
+      
+      <para>Usually you have already compiled and installed the
+      program you want to convert to a T2 extension package.</para>
+
+      <para>Find and download the tarballs you need in a directory
+      for that purpose.</para>
+
+      <para>At this point it is worth checking what the installation
+      documents say. For example you may need to use configuration
+      options like:</para>
+    
+      <screen>--enable-special-feature</screen>
+
+      <para>Once you have downloaded the latest packages they are most
+      likely not in the bz2 format. If you have slow internet
+      connection and want to prevent a second download you may want to
+      copy the tar balls directly into the archive. For
+      example:</para>
+
+
+<screen>gunzip package.tar.gz
+bzip2 package.tar
+mkdir -p download/repository/package
+cp package.tar.bz2 download/repository/package/</screen>
+
+    </sect1>
+
+    <sect1 id="t2.package.code">
+      <title>Custom Code</title>
+      
+      <para>In case your package goes beyond standard
+      <emphasis>configure</emphasis> or has its own non compliant
+      installation procedure some scripting is required.</para>
+
+      <para>It is quite possible you need to do some patching. In the
+      case of xfig, XPM was needed and after copying the original
+      Imakefile to Imakefile.old it was changed and a diff was run:
+
+<screen>diff -uN ./Imakefile.old ./Imakefile</screen>
+      </para>
+
+      <para>And the output can be added as a patch into the
+      configuration directory. The T2 Linux build scripts will
+      automatically apply the patches (see <xref
+      linkend="t2.package.patch"/>).</para>
+
+    </sect1>
+    
+    <sect1 id="t2.package.testing">
+      <title>Testing</title>
+      
+      <para>Before wrapping up your extension and sending it in test
+      it exhaustingly through several package builds and make sure:
+
+    <itemizedlist>
+	  <listitem>
+	    <para>all cp, rm, ln etc. commands are
+	<emphasis>forced</emphasis> (for rebuilds and updates)</para>
+	  </listitem>
+	  <listitem>
+	    <para>it builds</para>
+	  </listitem>
+	  <listitem>
+	    <para>it builds a 2nd time (for rebuilds and updates)</para>
+	  </listitem>
+	  <listitem>
+	    <para>it works correctly</para>
+	  </listitem>
+	  <listitem>
+	    <para>man pages etc. go to the right locations</para>
+	  </listitem>
+	  <listitem>
+	    <para>all the other files in the file-list are at the
+	    correct location</para>
+	  </listitem>
+	  <listitem>
+	    <para>you included the resulting .cache file (<xref
+	    linkend="t2.package.cache"/>) so the initial dependencies
+	    are known</para>
+	  </listitem>
+	</itemizedlist>
+
+      And when you really want to make the package perfect:
+
+    <itemizedlist>
+	  <listitem>
+	    <para>the package honors the build variable $prefix so the
+	    user or e.g. a target is able to install it to any
+	    location required</para>
+	  </listitem>
+	  <listitem>
+	    <para>it cross builds, that is picks the correct compiler
+	    and is DESTDIR aware</para>
+	  </listitem>
+	</itemizedlist>
+
+      </para>
+    </sect1>
+    
+  <sect1 id="t2.package.diff">
+    <title>Getting New Packages Into T2</title>
+    
+    <para>The first time you contribute a package you may want to send
+    it, as a patch, to the T2 community. Continuous committees might
+    get write access to the relevant version control system -
+    otherwise patches need to be sent in for modifications.</para>
+    
+    <para>If you find a bug in a package, scripts or documentation it
+    is usually a good idea to share your findings with others.</para>
+    
+    <para>Run diff against the original and the files you have changed
+    and send it as a file to the T2 Linux community.</para>
+    
+    <para>Contribute patches with (for example):</para>
+
+<screen>diff -ruN old-tree/ new-tree/ > yourname-t2-patch-yyyymmdd</screen>
+
+    <para>or:</para>
+
+<screen>scripts/Create-Diff old-tree new-tree > yourname-t2-patch-yyyymmdd</screen>
+    
+    <para>which does the same and skips directories like config or
+    download.</para>
+
+    <para>Send the patch to the T2 Linux community for
+    inclusion.</para>
+
+    <para>To apply a patch use the command:</para>
+
+<screen>patch -p1 -i patch-filename</screen>
+
+    <para>or the automated script which can determine the patch-level
+    and does a dry-run before the user can select whether the patch
+    should really be applied:</para>
+
+<screen>misc/archive/apply-patch.sh patch-filename</screen>
+    
+    <para>If you have a lot of changes try and send in the patches as
+    small hunks in separate emails to the mailing-list or the
+    appropriate repository maintainer. Make sure you include a short
+    note on what the patch does.</para>
+      
+    <para>This is nearly the same procedure as with patches that get
+    sent to the Linux kernel maintainers.</para>
+    </sect1>
+    
+    <sect1 id="t2.optimizations">
+      <title>Compiler Optimisations</title>
+      
+      <indexterm>
+	<primary>CFLAGS</primary>
+      </indexterm>
+      
+      <para>Wile the very historic versions of T2, before about the
+      year 2000, the user could set CFLAGS (and others) in his shell
+      before starting the build, and this resulted in unexpected
+      behavior since it influenced with the optimizations chosen in
+      scripts/Config.</para>
+      
+      <para>These variables are cleared now in scripts/parse-config
+      before building the packages. The configuration are chosen in
+      the scripts/config and injected using the gcc wrapper. It's
+      possible to add additional options in the Config or on a
+      per-package or target basis.</para>
+
+    </sect1>
+  
+  <sect1 id="t2.build-auto">
+  <title>The Automated Package Build</title>
+  
+  <para>One exceptional key feature of T2 is the Text/Plain and tag
+  based description format outlined in the last section in combination
+  with the automated build system.</para>
+
+  <para>The build systems extracts the tarballs and analysis the file
+  structure to decide how to build the package.</para>
+      
+  <sect2 id="t2.build-stages">
+    <title>Build Stages</title>
+    
+    <indexterm>
+      <primary>stages</primary>
+    </indexterm>
+    
+    <para>A quick overview about the intention of the various build stages:
+
+    <itemizedlist>
+      <listitem>
+	<para>Stage 0:</para>
+	
+	<para>In the initial stage a fresh cross-compile toolchain is
+	bootstrapped. This includes a OS header package like
+	linux-header defining the kernel
+	ABI<footnote><para>Application Binary
+	Interface</para></footnote>, the C-library header like glibc
+	defining the user-space ABI, as well as the cross-assembler
+	and linker from binutils and cross C/C++ cross-compiler,
+	usually gcc. Also some tools like tar and cpio are built to
+	have known good versions.</para>
+	
+        <para>This cross-compile setup is always used, even on native
+        build. Not so much for regression testing, but because the
+        resulting system differs in ABI due to major glibc, gcc
+        updates.</para>
+
+      </listitem>
+      <listitem>
+	<para>Stage 1:</para>
+	
+	<para>In stage 1 the selected packages are cross-compiled. On
+	native builds just a minimal set of packages for a
+	freestanding system is cross-compiled.</para>
+
+      </listitem>
+      <listitem>
+	<para>Stage 2-4:</para>
+	    
+	<para>After the cross stage the system changes - via chroot -
+	into the fresh stage 1 environment and bootstrap (re-compiles)
+	the native tools, to make sure they have not build invariance
+	and work reliable. This is often also referred to as
+	self-hosting: being able to rebuild itself.</para>
+	    
+	<para>Stage 3-4 are mostly unused and only exist because the
+	stages where spread over the range a single digit can
+	hold.</para>
+	
+      </listitem>
+      <listitem>
+	<para>Stage 5-8:</para>
+	
+	<para>Normal build stages, all the selected packages are
+	built.</para>
+
+	<para>Likewise, stage 6-8 are mostly unused and only exist
+	because the stages where spread over the range a single digit
+	can hold. Some packages are rebuilt to solve dependency graph
+	cycles due optional features of packages.</para>
+	    
+      </listitem>
+      <listitem>
+	<para>Stage 9:</para>
+	
+	<para>In the final stage 9 everything is compiled again to
+	test everything actually still works. Also the automated
+	regression tested creating the .cache files uses this rebuild
+	phase to guarantee all optional dependencies are recorded in
+	the .cache files.</para>
+
+	<para>This rebuild stage is disabled by default and only
+	paranoid people with excessive computing power need to enable
+	it.</para>
+      </listitem>
+    </itemizedlist>
+
+    </para>
+
+    <para>The packages that have to be built in every stage are
+    defined in config/$cfg/packages. scripts/Build-Target invokes
+    scripts/Build-Pkg for every package chroot'd in the build/
+    directory.</para>
+  </sect2>
+  
+  <sect2 id="t2.build-priority">
+    <title>Build Priority</title>
+    
+    <indexterm>
+      <primary>priority</primary>
+    </indexterm>
+    
+    <para>The build priority of a package controls at which time
+    during the whole target build a package is build. The priority
+    does not need to be unique, so it does not matter if another
+    package has the same build priority. In the case of duplicate
+    priorities the packages with the same priority are built in their
+    alphabetical order.</para>
+    
+    <para>But the initial priority of a new package is only a first
+    sorting, and will be puzzled after an reference build regularly to
+    solve all optional dependencies. This dependency information is
+    used to spread the packages over the nodes for a cluster build
+    (the linear priority is not used at all in this case) and e.g. for
+    the end user T2 Linux installer.</para>
+      
+    <para>It is planned that future versions of T2 will not require
+    this scheduling hint and instead order the packages by the
+    dependency graph as obtained by the .cache files.</para>
+  </sect2>
+  
+  <sect2 id="t2.build-styles">
+    <title>Supported Build Styles</title>
+    
+    <itemizedlist>
+      <listitem>
+	<para>GNU/Autoconf: ./configure ; make ; make install
+	(including a autogen.sh or libtoolize, aclocal, automake,
+	autoconf run to generate the actual configure et al.)</para>
+      </listitem>
+      <listitem>
+	<para>X11 Imakefile: xmkmf ; make ; make install</para>
+      </listitem>
+      <listitem>
+	<para>traditional Makefiles: make ; make install</para>
+      </listitem>
+      <listitem>
+	<para>Python setup.py: python setup.py build install</para>
+      </listitem>
+      <listitem>
+	<para>Perl Makefile.PL: perl Makefile.PL</para>
+      </listitem>
+      <listitem>
+	<para>cmake: cmake ; make ; make install</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>Only if the automated procedure is not sufficient for a
+    package to be built, additional 'glue' code is necessary in the
+    package's '.conf' file.</para>
+
+    </sect2>
+    <!--
+    <sect2>
+    <title>Building a package by hand</title>
+    %
+    %\label{package.hand}
+    </sect2>
+    -->
+      
+  </sect1>
+  
+  <sect1 id="t2.variable.work-with">
+    <title>Working with Variables</title>
+    
+    <para>Often T2 Linux code needs to set or modify environment
+    variables - either for the build system <xref
+    linkend="t2.variable.environment"/>, the command wrapper <xref
+    linkend="t2.wrapper"/> or hooks <xref linkend="t2.hooks"/>.</para>
+
+    <para>Since many environment variables contain lists, it is
+    important to take care of delimiters (like colons or semicolons)
+    and the order of list items. Also there must not be any stray
+    white-spaces or delimiters be left in the content after applying a
+    modification.</para>
+
+  <sect2 id="t2.variable.functions">
+    <title>Functions for Variable Modifications</title>
+    
+    <para>To make working with variables more convenient in bash some
+    functions fulfilling the requirements above got introduced for the
+    developer:</para>
+
+    <itemizedlist>
+      
+      <indexterm>
+	<primary>var_append</primary>
+      </indexterm>
+      
+      <listitem>
+	<para>var_append name delimiter content</para>
+	
+	<para>The 'content' is appended to the variable referred to
+	with 'name'.  If the variable was not empty the 'delimiter' is
+	inserted between the already existing and new content.</para>
+	
+	<screen>var_append CC_WRAPPER_INSERT ' ' -O3</screen>
+      </listitem>
+      
+    <indexterm>
+      <primary>var_insert</primary>
+    </indexterm>
+    
+    <listitem>
+      <para>var_insert name delimiter content</para>
+      
+      <para>The 'content' is inserted to the beginning of the content
+      of the variable referred to with 'name'. If the variable was non
+      empty the 'delimiter' is inserted between the new and the
+      already existing content.</para>
+      
+      <screen>var_insert PATH ':' "$SOMEPATH/bin"</screen>
+    </listitem>
+    
+    <indexterm>
+      <primary>var_remove</primary>
+    </indexterm>
+    
+    <listitem>
+      <para>var_remove name delimiter content</para>
+      
+      <para>If the 'content' is present in the variable referred to
+      with 'name' is removed including the associated 'delimiter' - if
+      present.</para>
+      
+<screen>var_remove CC_WRAPPER_INSERT ' ' -O2</screen>
+    
+    </listitem>
+    
+    <indexterm>
+      <primary>var_remove_regex</primary>
+    </indexterm>
+    
+    <listitem>
+      <para>var_remove_regex name delimiter regex</para>
+    
+      <para>The regular expression 'regex' is used to remove the
+      matching part including its associated delimiter from the
+      variable referred to with 'name'.</para>
+
+      <para>Example: A ./configure script does not like the option
+      --prefix= and thus it needs to be removed from the confopt
+      variable, var_remove_regex can be used to remove the
+      option:</para>
+
+      <screen>var_remove_regex confopt ' ' '--prefix=.*'</screen>
+      
+    </listitem>
+    
+    <indexterm>
+      <primary>var_remove_before_regex</primary>
+    </indexterm>
+    
+    <listitem>
+      <para>var_insert_before_regex name delimiter regex</para>
+    
+      <para>If the regular expression 'regex' matches a part of the
+      variable referred to with 'name' the 'content' including its
+      delimiter if needed is added before the match.</para>
+      
+      <screen>var_insert_before_regex patchfiles ' ' 'mypatch.diff' '.*\/foo.d'</screen>
+    </listitem>
+    
+  </itemizedlist>
+    
+  </sect2>
+  </sect1>
+  
+  <sect1 id="t2.hooks">
+  <title>Build System Hooks</title>
+  
+  <para>The automated build of a package, as implemented in the T2 SDE,
+  can be separated in several phases which have a associated hook
+  where package configuration or targets can <emphasis>hook</emphasis>
+  custom modifications in.</para>
+  
+  <sect2 id="t2.hooks.list">
+    <title>Available Hooks</title>
+    
+    <para>The hooks are:</para>
+    
+    <itemizedlist>
+      
+      <indexterm>
+	<primary>prepare</primary>
+      </indexterm>
+      <listitem>
+	<para>prepare: Preparation of the package build. The hook
+	'prepare' is evaluated as one of the first actions when a
+	package build is started.</para>
+      </listitem>
+      
+    <indexterm>
+      <primary>prepatch</primary>
+    </indexterm>  
+    <listitem>
+      <para>prepatch: One of the first things the build system does,
+      is the extraction and patching of the package archive
+      files. Before applying the patches the hook 'prepatch' is
+      evaluated.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>postpatch</primary>
+    </indexterm>
+    <listitem>
+      <para>postpatch: The hook 'postpatch' is evaluated after
+      applying the patches.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>postdoc</primary>
+    </indexterm>
+    <listitem>
+      <para>postdoc: The build system features an automatic copy
+      operation of most useful documentation files, like the packages
+      README, LICENSE, AUTHORS, and so on. The hook 'postdoc' is
+      evaluated after this operation.</para>
+      </listitem>
+    
+    <indexterm>
+      <primary>preconf</primary>
+    </indexterm>
+    <listitem>
+      <para>preconf: Most packages need a configuration process - for
+      example running the GNU/autoconf script. Before running the
+      detected configure with auto-detected options the hook 'preconf'
+      is evaluated.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>premake</primary>
+    </indexterm>
+    <listitem>
+      <para>premake: Before running make the hook 'premake' is
+      evaluated.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>inmake</primary>
+    </indexterm>
+    <listitem>
+      <para>inmake: Between running 'make' and 'make install' the hook
+      'inmake' is valuated.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>postmake</primary>
+    </indexterm>
+    <listitem>
+      <para>postmake: After running 'make install' the hook 'postmake'
+      is evaluated.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>postinstall</primary>
+    </indexterm>
+    <listitem>
+      <para>postinstall: After the whole normal build process and
+      before the final file list creation the hook 'postinstall' is
+      evaluated.</para>
+    </listitem>
+    
+    <indexterm>
+      <primary>postflist</primary>
+    </indexterm>
+    <listitem>
+      <para>postflist: After the file list creation for the package
+      the hook 'postflist' is evaluated.</para>
+	
+      <warning><para>As at this point the package file list (flist) is
+      already created, you need to manually append files to the flist
+      in the case new files are created in the postflist hook with
+      'add_flist':</para>
+      <screen>add_flist /some/new/file</screen>
+      </warning>
+    </listitem>
+    
+    <indexterm>
+      <primary>finish</primary>
+    </indexterm>
+    <listitem>
+      <para>finish: As last step in the package build - after all the
+      /var/adm/* meta-data creation - the hook 'finish' is
+      evaluated.</para>
+	
+      <para>This is usually used to do run some management code, for
+      example the ccache support prints some pretty statistics at this
+      time.</para>
+
+      <warning><para>At this point it is not possible to modify
+      package files anymore as all /var/adm/* meta-data is
+      finalized!</para></warning>
+	
+    </listitem>
+    
+  </itemizedlist>
+  
+  </sect2>
+  
+  <sect2 id="t2.hooks.work-with">
+    <title>Working with Hooks</title>
+    
+    <para>There are two functions that operate on hook: 'hook_add' and
+    'hook_eval'.</para>
+  </sect2>
+  
+  <sect2 id="t2.hooks.filling">
+    <title>Filling Hooks</title>
+    
+    <indexterm>
+      <primary>hook_add</primary>
+    </indexterm>
+    
+    <para>Usually you just want to add an operation to a hook - this
+    is done with:</para>
+    
+    <itemizedlist>
+      <listitem>
+	<para>hook_add hook-name priority command</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>The priority (which can be in the rang of 0-9) is used to
+    sort the attached operations to run them in a predictable
+    order.</para>
+      
+    <para>For example if you want to copy a directory named 'tools' to
+    the documentation directory of the package because it contains
+    some useful example tools, you just need to add:</para>
+
+<screen>hook_add postmake 5 "cp -vrf tools $docdir"</screen>
+
+    <para>to the package's .conf file. If you have a more complex operation
+    to be done inside a hook you should define a function and just
+    attach the new function to the hook:
+
+<screen>mypackage_pm () {
+        # some code
+}
+hook_add postmake 5 "mypackage_pm"</screen>
+
+</para>
+    
+  </sect2>
+    
+    <sect2 id="t2.hooks.eval">
+      <title>Evaluating Hooks</title>
+      
+      <indexterm>
+	<primary>hook_eval</primary>
+      </indexterm>
+      
+      <para>In the rare case where you package a unusual and complex
+      package which completely disables the whole automatic build
+      system you might get into a situation where you want to evaluate
+      the content of a hook to let targets apply custom modifications
+      on the package.</para>
+
+      <para>Evaluation of a hook is done with:
+
+<screen>hook_eval hook-name</screen>
+
+      this will run all operations attached to the hook sorted by the
+      supplied priorities.</para>
+
+      <para>You most likely will never need to get in touch with this,
+      since as the time of writing only the gcc, glibc and kiss
+      package make use of custom hook evaluation ...</para>
+    
+  </sect2>
+  </sect1>
+
+  <sect1 id="t2.wrapper">
+  <title>Command Wrapper</title>
+  
+  <para>For generic program argument transformations in T2 Linux,
+  wrapper applications got introduced allowing on-the-fly modification
+  of program arguments. The wrapper binary is automatically compiled
+  by the build system and placed inside a tool directory put as first
+  search location into the PATH environment variable. Thus any
+  invocation of the to-be-wrapped application will cause the wrapper
+  to be executed.</para>
+    
+  <sect2 id="t2.wrapper.list">
+    <title>Available Wrappers</title>
+    
+    <para>The currently existing wrappers are:</para>
+    
+    <itemizedlist>
+      <listitem>
+	<para>cmd (CMD): a generic command wrapper</para>
+	</listitem>
+      <listitem>
+	<para>cc (CC): C compiler wrapper</para>
+      </listitem>
+      <listitem>
+	<para>c++ (CXX): C++ compiler wrapper</para>
+      </listitem>
+      <listitem>
+	<para>kcc (KCC): Kernel C compiler wrapper</para>
+      </listitem>
+      <listitem>
+	<para>f77 (F77): Fortran 77 compiler wrapper</para>
+      </listitem>
+      <listitem>
+	<para>strip (STRIP): configuration for strip wrapper</para>
+      </listitem>
+      <listitem>
+	<para>install, cp, ln, move (INSTALL): file installation
+	wrapper</para>
+      </listitem>
+    </itemizedlist>
+  
+  </sect2>
+  
+  <sect2 id="t2.wrapper.config">
+    <title>Wrapper Configuration</title>
+    
+    <para>Each of this wrappers has a set of associated environment
+    variables to configure the wrapper at runtime. Each of the
+    variables is prefixed with the wrapper name in capital letters
+    (see the list above for details):</para>
+    
+    <itemizedlist>
+      <listitem>
+	<para>prefix_WRAPPER_DEBUG: If set to a non-zero value the
+	wrapper will log actions to the standard output.</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_BYPASS: If set to a non-zero value the
+	wrapper will be deactivated and thus no transformations
+	applied.</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_INSERT: Arguments to be inserted at the
+	beginning of the argument string.</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_REMOVE: Arguments to be removed from the
+	argument string.</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_APPEND: Arguments to be appended at the
+	end of the argument list.</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_FILTER: A colon (':') separated list of
+	commands used to transform the arguments (for example: "sed
+	'...' | awk '...'  | foobar").</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_OTHERS: A colon (':') separated list of
+	other wrappers to be run first.</para>
+      </listitem>
+      
+      <listitem>
+	<para>prefix_WRAPPER_APPEND_PO: 'PO' stands for 'PreOthers' -
+	the content will be added when others wrappers are executed
+	first.</para>
+      </listitem>
+      
+    </itemizedlist>
+  
+  </sect2>
+
+  <sect2 id="t2.variable.environment">
+  <title>Environment Variables</title>
+  
+  <para>All scripts, including the package .conf files, get run with
+  certain environment variables set. This section does provide a full
+  list, including the usage and meaning.</para>
+
+  <para>Basic build characterization:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>config: Name of the active configuration
+      (e.g. default).</para>
+    </listitem>
+    <listitem>
+      <para>extraver: Version text after the first whitespace, or
+      $sdever if no extra version is present.</para>
+    </listitem>
+    <listitem>
+      <para>sdever: T2 Linux Version (including release date for
+      snapshots).</para>
+    </listitem>
+    <listitem>
+      <para>arch: Architecture name (subdir in architecture).</para>
+    </listitem>
+    <listitem>
+      <para>target: Target distribution name (subdir in
+      targets).</para>
+    </listitem>
+    <listitem>
+      <para>base: T2 Linux sources base directory.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Architecture build characterization:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>crossnative: Either contains the value 'cross' or 'native'
+      reflecting the build mode.</para>
+    </listitem>
+    <listitem>
+      <para>archprefix: Program prefix for binutils and compiler
+      binaries (for cross-building).</para>
+    </listitem>
+    <listitem>
+      <para>arch_sizeof_long_long: Size of 'long long' - arch setting
+      from architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_sizeof_int: Size of 'int' - arch setting from
+      architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_machine: Machine name - arch setting from
+      architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_sizeof_char_p: Size of 'char*' - arch setting from
+      architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_sizeof_long: Size of 'long' - arch setting from
+      architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_bigendian: Indicates whether the architecture is
+      big-endian - arch setting from architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_sizeof_short: Size of 'short' - arch setting from
+      architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_target: Target name - arch setting from
+      architecture/*/archtest.out.</para>
+    </listitem>
+    <listitem>
+      <para>arch_build: Build name - like 'arch_target' - but for the
+      build host.</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>Build directories:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>root: Root directory (usually '/').</para>
+    </listitem>
+    <listitem>
+      <para>xroot: Real root directory (/R.work/build/... when in chroot mode).</para>
+    </listitem>
+    <listitem>
+      <para>build_log: Build log file ... (Build-Target only).</para>
+    </listitem>
+    <listitem>
+      <para>build_pkgs: Package files go here .. (Build-Target only).</para>
+    </listitem>
+    <listitem>
+      <para>build_root: Change-root dir name ...... (Build-Target only).</para>
+    </listitem>
+    <listitem>
+      <para>targetdir: Directory containing the target config (target/...).</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Package build characterization:</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>pkg: Name of the package to be built.</para>
+    </listitem>
+    <listitem>
+      <para>ver: Package version (from *.desc - until first
+      whitespace).</para>
+    </listitem>
+    <listitem>
+      <para>desc_[A-Z]: Tag data from the *.desc file.</para>
+    </listitem>
+    <listitem>
+      <para>id: Unique ID for this Build-Pkg invocation.</para>
+    </listitem>
+    <listitem>
+      <para>stagelevel: Active build stage (0-1 = crossbuild, 2-8 =
+      native, 9 = rebuild).</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Package build directories:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>archdir: Directory containing the package vanilla archive
+      files (download/...).</para>
+    </listitem>
+    <listitem>
+      <para>confdir: Directory containing the package build config
+      (package/...).</para>
+    </listitem>
+    <listitem>
+      <para>builddir: Directory in which the package is build
+      (src.$id).</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Package install directories:</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>prefix: Install prefix (usually '/usr' or '/opt/...').</para>
+    </listitem>
+    <listitem>
+      <para>prefix_auto: Set to '1' if the value was not supplied by
+      the user and thus can be redetected in the package .conf
+      file.</para>
+    </listitem>
+    <listitem>
+      <para>bindir: Location where the binaries (programs) should be
+      installed.</para>
+    </listitem>
+    <listitem>
+      <para>sbindir: Location where the system binaries should be
+      installed.</para>
+    </listitem>
+    <listitem>
+      <para>libdir: Location where the library files should be
+      installed.</para>
+    </listitem>
+    <listitem>
+      <para>sysconfdir: Location where the configuration should be
+      installed (i.e. etc).</para>
+    </listitem>
+    <listitem>
+      <para>localstatedir: Location where the variable data should be
+      installed (i.e. var).</para>
+    </listitem>
+    <listitem>
+      <para>datadir: Location where the architecture independent data
+      should be installed (i.e. share).</para>
+    </listitem>
+    <listitem>
+      <para>docdir: Location where the documentation should be
+      installed.</para>
+    </listitem>
+    <listitem>
+      <para>mandir: Location where the info man pages should be
+      installed.</para>
+    </listitem>
+    <listitem>
+      <para>infodir: Location where the info files should be
+      installed.</para>
+    </listitem>
+    <listitem>
+      <para>includedir: Location where the header files should be
+      installed.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Package's automated build system configuration:</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>autoextract: When set to '0' automatic untar will be
+      skipped.</para>
+    </listitem>
+    <listitem>
+      <para>autopatch: When set to '0' automatic patching will be
+      skipped.</para>
+    </listitem>
+    <listitem>
+      <para>chownsrcdir: When set to '0' the run of chown-ing the root
+      after extracting the $srctar will be skipped.</para>
+    </listitem>
+    <listitem>
+      <para>nocvsinsrcdir: When set '0' CVS and .svn directories in
+      $srcdir will not be removed.</para>
+    </listitem>
+    <listitem>
+      <para>srctar: Filename of the source tar file ('auto' =
+      autodetect).</para>
+    </listitem>
+    <listitem>
+      <para>srcdir: Directory in the source tar file ('auto' =
+      autodetect).</para>
+    </listitem>
+    <listitem>
+      <para>xsrctar: Filename of the source tar file after 'auto' has
+      been processed.</para>
+    </listitem>
+    <listitem>
+      <para>xsrcdir: Directory in source tar file after 'auto' has
+      been processed.</para>
+    </listitem>
+    <listitem>
+      <para>taropt: Options for extraction via tar.</para>
+    </listitem>
+    <listitem>
+      <para>patchfiles: List of patchfiles found in $confdir.</para>
+    </listitem>
+    <listitem>
+      <para>patchopt: Options passed to the patch program.</para>
+    </listitem>
+    <listitem>
+      <para>createprefix: If set to '0' to skip creation for directory
+      skeleton for $prefix.</para>
+    </listitem>
+    <listitem>
+      <para>createdocs: If set to '0' to skip automatic copying of
+      documentation files.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Build flow modifications (deprecated by the new hooks - see
+  <xref linkend="t2.hooks"/>)</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>prepare: Command to be executed before the main
+      build-block.</para>
+    </listitem>
+    <listitem>
+      <para>prepatch: Command to be executed before the automatic
+      patching.</para>
+    </listitem>
+    <listitem>
+      <para>postpatch: Command to be executed after the automatic
+      patching.</para>
+    </listitem>
+    <listitem>
+      <para>postdoc: Command to be executed after the automatic
+      document copy process.</para>
+    </listitem>
+    <listitem>
+      <para>preconf: Command to be executed before running
+      configure.</para>
+    </listitem>
+    <listitem>
+      <para>premake: Command to be execute before running
+      'make'.</para>
+    </listitem>
+    <listitem>
+      <para>inmake: Command to be execute between 'make' and 'make
+      install'.</para>
+    </listitem>
+    <listitem>
+      <para>postmake: Command to be execute after running 'make
+      install'.</para>
+    </listitem>
+    <listitem>
+      <para>postflist: Command to be execute after creating the
+      flist.</para>
+    </listitem>
+    <listitem>
+      <para>postinstall: Command to be execute after finishing all the
+      standard stuff.</para>
+    </listitem>
+    <listitem>
+      <para>finish: Command to be execute after everything else
+      outside build-block.</para>
+    </listitem>
+    <listitem>
+      <para>custmain: Command to execute instead of 'configure, make,
+      make install'.</para>
+    </listitem>
+    <listitem>
+      <para>mainfunction: Alternate main function instead of
+      build_this_package().</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>Build type flow configuration</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>runconf: When set to '0' running configure will be
+      disabled.</para>
+    </listitem>
+    <listitem>
+      <para>runxmkmf: When set to '0' running 'xmkmf' will be
+      disabled.</para>
+    </listitem>
+    <listitem>
+      <para>runmkpl: When set to '0' running 'perl Makefile.PL' will
+	be disabled.</para>
+    </listitem>
+    <listitem>
+      <para>runpysetup: When set to '0' running 'python
+	    setup.py' will be disabled</para>
+    </listitem>
+    <listitem>
+      <para>autogen: When set to '1' running the autogen script will
+      be enabled.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Configuration parameters</para>
+  
+  <itemizedlist>      
+    <listitem>
+      <para>confopt: Options used for GNU autoconf './configure'.</para>
+    </listitem>
+    <listitem>
+      <para>extraconfopt: Options which should be appended to $confopt
+      by set_confopt().</para>
+    </listitem>
+    <listitem>
+      <para>configprefix: Prefix to the GNU autoconf './configure'
+      script.</para>
+    </listitem>
+    <listitem>
+      <para>configscript: Specify the name used instead of
+      './configure' for GNU autoconf.</para>
+    </listitem>
+    <listitem>
+      <para>pyconfopt: Options used for setup.py - the Python setup scripts.</para>
+    </listitem>
+    <listitem>
+      <para>makeopt: Options used for 'make' (defaults to useful CC,
+      CXX, HOSTCC, prefix ... settings).</para>
+    </listitem>
+    <listitem>
+      <para>makeinstopt: Options used for 'make install' (defaults to
+      '$makeopt install').</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>File list modifications:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>flistdel: Regex describing files which shouldn't go into
+      the package file list.</para>
+    </listitem>
+    <listitem>
+      <para>flistrfilter: Regex describing which lines to ignore in flist rlog.</para>
+    </listitem>
+    <listitem>
+      <para>flistroot: List of top-level directories which should be
+      used for the file list.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Post build sanity checks:</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>check_shared: Check for files which are shared with other packages.</para>
+    </listitem>
+    <listitem>
+      <para>check_usrlocal: Check for files which are installed in usr/local.</para>
+    </listitem>
+    <listitem>
+      <para>check_badfiles: Check for files which are registered 'bad files'.</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>Program invocation:</para>
+
+<itemizedlist>
+      <listitem>
+	<para>BUILDCC: C compiler for helper apps (usually that's just 'cc').</para>
+      </listitem>
+      <listitem>
+	<para>BUILD_CC: C compiler for helper apps (must be the same as $BUILDCC).</para>
+      </listitem>
+      <listitem>
+	<para>HOSTCC: C compiler for helper apps (must be the same as $BUILDCC).</para>
+      </listitem>
+      <listitem>
+	<para>HOST_CC: C compiler for helper apps (must be the same as $BUILDCC).</para>
+
+      </listitem>
+      <listitem>
+	<para>MAKE: Make executable name.</para>
+      </listitem>
+      <listitem>
+	<para>CC: C compiler executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>CXX: C++ compiler executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>STRIP: Strip executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>LD: Ld executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>AR: Ar executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>RANLIB: Ranlib executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>AS: As executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>GASP: Gasp executable name for target architecture.</para>
+      </listitem>
+      <listitem>
+	<para>NM: Nm executable name for target architecture.</para>
+      </listitem>
+    </itemizedlist>
+
+  <para>Wrapper configuration (see <xref linkend="t2.wrapper"/> for a
+  detailed description):</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para>CMD_WRAPPER_*: configuration for the generic command wrapper</para>
+    </listitem>
+    <listitem>
+      <para>CC_WRAPPER_*: configuration for C compiler wrapper</para>
+    </listitem>
+    <listitem>
+      <para>CXX_WRAPPER_*: configuration for C++ compiler wrapper</para>
+    </listitem>
+    <listitem>
+      <para>KCC_WRAPPER_*: configuration for Kernel C compiler wrapper</para>
+    </listitem>
+    <listitem>
+      <para>F77_WRAPPER_*: configuration for Fortran 77 compiler wrapper</para>
+    </listitem>
+    <listitem>
+      <para>STRIP_WRAPPER_*: configuration for strip wrapper</para>
+    </listitem>
+    <listitem>
+      <para>INSTALL_WRAPPER_*: configuration for the install wrapper</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>Modular supplied configuration:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>SDECFG_*: configuration from 'Config' file</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>Build scripts are executed from $base/src.</para>
+  
+  </sect2>
+  </sect1>
+  
+  <sect1 id="t2.bash.hacking">
+  <title>Hacking with Bash</title>
+  
+  <para>T2 is written in bash shell scripts mostly. The reasons
+  are:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>Minimal dependency on outside tools</para>
+    </listitem>
+    <listitem>
+      <para>Fast build system</para>
+    </listitem>
+    <listitem>
+      <para>Potentially build T2 on different Unix editions</para>
+    </listitem>
+    <listitem>
+      <para>Scripting understood by system administrators</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>This subsection gives some general information on hacking bash
+  in addition to the man pages. Yes, try
+
+<screen>man bash</screen>
+
+  which gives a load of good information and
+
+<screen>info bash</screen>
+
+  which gives even more!</para>
+  </sect1>
+  
+  <sect1 id="t2.bash.version">
+    <title>Bash Version</title>
+    
+    <para>It is a good idea to use a recent version of bash since T2
+    uses it heavily. Check the version number with:</para>
+    
+    <screen>bash --version</screen>
+  </sect1>
+  
+  <sect1 id="t2.bash.general">
+    <title>General</title>
+    
+    <para>Writing shell scripts can be tricky - especially when
+    nesting several layers of pipes. It is a good idea to structure
+    one element at a time and printing output.</para>
+
+    <para>T2's scripts are a great source for ideas! Just cut and
+    paste partial commands into your running shell.</para>
+  </sect1>
+  
+  <sect1 id="t2.bash.intro">
+    <title>Introduction</title>
+
+    <para>The only real debugging-tool the shell provides is the 'set
+    -x' command. After this command is executed, all further commands
+    will be printed to the terminal before they are executed until a
+    'set +x' command is found.</para>
+
+    <para>A BASH debugger has also been developed. This may make life
+    easier for you. Check out <ulink
+    url="http://bashdb.sourceforge.net/"/>.</para>
+  </sect1>
+  
+  <sect1 id="t2.bash.watch">
+    <title>How to Watch the Value of a Variable While Running a Script</title>
+    
+    <para>The easiest way to do that is to put 'echo $variable' in the
+    script to output the variable or using 'set -x' and grepping for
+    '=' in the debug output.</para>
+
+    <para>You also can use 'echo $variable &gt;; /tmp/somefile' - so
+    /tmp/somefile contains the current value of the variable.</para>
+
+    <para>Simply use the commands 'set' or 'export' in the script to
+    dump all variables or the exported variables of the shell
+    process.</para>
+
+    <para>If you know the PID of the running shell script, you can
+    also type:
+
+<screen>tr '\000' '\n' &lt; /proc/PID/environ</screen>
+
+     to dump all exported variables of the shell process without
+     modifying the script.</para>
+
+    <para>The last method can also be used to 'monitor' one
+    variable. The variable needs to be exported to do that. If we want
+    to watch the exported variable 'dummy' in the shell process with
+    the PID 123:</para>
+
+<screen>    while : ; do
+        tr '\000' '\n' &lt; /proc/123/environ | grep '^dummy='
+        sleep 1
+    done</screen>
+
+  </sect1>
+  
+  <sect1 id="t2.bash.breakpoint">
+    <title>How to Interrupt Scripts Based on Conditions</title>
+    
+    <para>
+
+<screen>if false ; then exit 1 ; fi</screen>
+
+    or
+
+<screen>if false ; then 
+  exit 1  
+fi</screen>
+
+    or 
+
+<screen>false &amp; {                                                              
+  echo "Error" ; exit 1                                           
+}</screen>
+
+    </para>
+    
+    <para>If you write everything in one line don't forget the last
+    semicolon:
+
+<screen>false &amp;&amp; { echo "Error" ; exit 1 ; }</screen>
+</para>
+
+  </sect1>
+  
+  <sect1 id="t2.bash.exceptions">
+    <title>Exceptions</title>
+    
+    <para>Aehhhm ... this is Shell - not C++</para>
+
+    <para>But you can use the 'trap' shell-builtin to catch signals
+    (see the bash manpage for details). E.g. if you want to display
+    the value of the variable 'dummy' whenever you send signal
+    SIGUSR1, add this to the top of your script:
+
+<screen>trap 'echo $dummy' SIGUSR1</screen>
+
+    </para>
+
+    <para>Now start the script and get its PID. Let's say it has PID
+    123:
+
+<screen>kill -SIGUSR1 123</screen>
+
+    </para>
+  </sect1>
+  
+  <sect1 id="t2.bash.skip">
+    <title>How to Skip Part of a Script While Testing</title>
+    
+    <para>The shell has no 'goto' statement. So you need to comment
+    out the part you want to skip or surround it with
+
+<screen>if false ; then
+  ...
+fi</screen>
+
+    </para>
+    
+    <para>Additionally you can use the 'break' builtin to finish loops
+    earlier than they would normally finish.</para>
+
+  </sect1>
+  
+  <sect1 id="t2.bash.variables">
+    <title>Convenient Variables</title>
+    
+<screen>
+$BASH_VERSION .. Set when shell is bash. Contains version number.
+$PS4 ........... Prefix for 'set -x' debug output lines.
+$SHLVL ......... Shell Level. Incremented by 1 for every new shell.
+$- $SHELLOPTS .. Active shell options (also see 'set -o').
+$$ ............. PID of the shell process.
+$SECONDS ....... Seconds since shell invocation.
+</screen>
+
+
+<!-- TODO: hacking with Lua -->
+
+  </sect1>
+  
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

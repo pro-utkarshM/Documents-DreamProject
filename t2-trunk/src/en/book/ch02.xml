@@ -1,0 +1,153 @@
+<chapter id="t2.basics">
+
+  <title>Basic Concepts</title>
+
+  <simplesect id="t2.basics.intro">
+    
+    <para>It was not that easy to develop a whole (Linux) system from
+    scratch, especially as years ago all the many details where not as
+    documented as they are today. Bootstrapping a complete system from
+    scratch required in-depth knowledge about the kernel, compiler and
+    system libraries and to solve some obstacles in order to get all
+    the toolchain and library parts correctly built together to form a
+    functional system. That is also why most of the many Linux
+    flavours build upon existing Debian, RedHat or SuSE distributions
+    - just extracting the pre-built binaries and injecting a few
+    custom files. T2 on the other hand is among the few designed from
+    the ground up to define a system without historic cruft with the
+    additional bonus of the automated build system to inject custom
+    modifications as needed.</para>
+    
+    <para>Designing a self-hosting system, one that can be used to
+    re-build itself, is the next technical challenge.</para>
+
+    <para>The T2 SDE is both, designed from the grounds up with an
+    infrastructure optimized for (cross-)compiling from package
+    sources - as automated as possible - as well as
+    selfhosting.</para>
+    
+    <para>Vast amount of work was put into setting the whole
+    infrastructure up for cross compiling to all the different CPU
+    architectures supported.</para>
+    
+  </simplesect>
+  
+  <sect1 id="t2.basics.architecture">
+    <title>T2 Architecture</title>
+    
+    <para>The T2 SDE automatic build system is written in form of
+    shell scripts. The main components with additional tools can be
+    found in the directory scripts/.</para>
+    
+    <para>It is responsible for parsing package meta-data and config
+    files, creating the T2 sandbox environment with its file
+    modification tracking functionality and command wrappers,
+    packaging the result and all the other needed actions between the
+    steps in the build chain. It is also able to perform dependency
+    analysis and includes the menu-driven configuration program to
+    configure the build.</para>
+    
+    <para>Usually there is one script for a specific function, for
+    example: scripts/Config, Download, Build-Target, Create-ISO among
+    others. Some scripts are also re-used internally, for example
+    scripts/Download is invoked automatically on-demand, to fetch the
+    packages sources when they are required.</para>
+    
+    <para>T2 build scripts are all run from the T2 top-level
+    directory, like scripts/Config and scripts/Build-Target and
+    parse and process the various meta information from the respective
+    directories such as package/, architecture/ and target/</para>
+    
+    <para>The package meta-data is defined by key-value pairs in
+    various package repositories located in a sub-directory named
+    package/ sorted into categories like package/base,
+    package/network, package/x11, and so on. For each package a
+    Text/Plain .desc file contains the original author, the T2
+    maintainer, license, version, status, download location with
+    checksum, textual information for the end-user and architecture
+    limitation as well as additional optional tags (see <xref
+    linkend="t2.package.desc"/>). Patches needed to compile the
+    package or to fix security or usability bugs can simply be placed
+    in the package directory.</para>
+
+    <para>While the automated build system iterates over all packages
+    to be built, it parses the package's meta-data and extracts the
+    source tar-balls, applies all the patches and detects the build
+    type of the source automatically (e.g. configure make, xmkmf,
+    plain make or variations - see <xref linkend="t2.build-auto"/>)
+    and builds the package with generated default options. For
+    packages where modifications in the process are appropriate a
+    .conf file for the package can modify variables, add commands to
+    predefined hooks or replace the whole process. An automatically
+    generated .cache file holds generated dependency information as
+    well as reference build-time, package file count and the package
+    size.</para>
+    
+    <para>Additionally CPU architecture specifica is located in the
+    architecture/ directory, including optimization options, patches
+    or other required quirks.</para>
+    
+    <para> The target configuration, patches and other payload resists
+    in targets/.</para>
+    
+    <para>Before T2 2.0 "sub-distributions" where extracted out of a
+    fully built distribution as a sub-set. This had the drawback that
+    the first build needed to build all packages needed by the
+    sub-distributions and that sub-distributions only had the
+    possibility to modify the packages to a minimal degree since this
+    had to happen after the normal package build.</para>
+
+    <para>With T2 2.0 "targets" where introduced as a smarter way of
+    dealing with specialization: A target limits its package selection
+    and thus download as well as build to what is really
+    required. Furthermore it and can modify any aspect of a package
+    build, apply custom feature or branding patches and even replace
+    the logic to build a package or final image creation process
+    completely.</para>
+    
+    <figure id="t2.basic.overview">
+      <title>T2 basic overview</title>
+      <graphic fileref="images/t2-overview.png"/>
+    </figure>
+    
+  </sect1>
+  
+    <sect1 id="t2.basics.stable.versus.trunk">
+    <title>Stable branches versus trunk</title>
+    
+    <para>T2 is under continuous development, with the development
+    work beeing done in the version control system - currently
+    Subversion. With a version as target milestone, for example 7.0,
+    8.0, ... When most development goals are archived, this trunk is
+    branched and this version prepared for the release. In parallel
+    development continuous in the trunk with the next milestone
+    version, 8.0 in this case. So each version milestone has a release
+    series in the end of the development cycle. Though the development
+    version from the trunk usually work well enough to download and
+    build a common Linux system, there is no guarantee that all
+    architectures, C libraries, packages and target configurations
+    build perfectly at any given time.</para>
+
+    <para>The packages of the development trunk tend to be more up to
+    date than the stable ones, as the branches are usually maintained
+    with API and ABI compatibility in mind and mostly include security
+    and compile fixes only. Sometimes the development edition will be
+    in <emphasis>research mode</emphasis> adapting the latest kernel,
+    C library, compiler or CPU architecture combination or rearranging
+    the build scripts for new features, concepts and cleanups.</para>
+
+    <para>If you are a normal user or administrator of production
+    machines you should choose to use the latest stable branch. The
+    development tree is usually used by developers, while users and
+    administrators often only try the trunk when it approaches the
+    next stable release.</para>
+
+  </sect1>
+  
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

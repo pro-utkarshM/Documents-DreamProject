@@ -1,0 +1,1101 @@
+<chapter id="t2.build">
+  <title>Building T2</title>
+  
+  <sect1 id="t2.build.download">
+    <title>Downloading the T2 Source Code</title>
+    
+    <para>First thing to do is to choose one of the T2 Linux versions
+    and download it from <ulink url="http://www.t2-project.org/"/>
+    (see also <xref linkend="t2.basics.stable.versus.development"/>).
+    A tarball of the distribution scripts is only a few MB in size and
+    downloads quickly.</para>
+
+    <para>T2's stable versions go hand-in-hand with stable Linux
+    kernel versions. Nevertheless most T2 users use the development
+    versions of T2 Linux anyway <!--TODO: (see appendix
+    \ref{which})-->. One addicting feature of T2 is that you get the
+    latest version of every package, including the kernel. The
+    development versions of T2 have proved to be pretty
+    robust. Nevertheless a development version can potentially be
+    broken.</para>
+
+    <para>Untar the file and it unpacks documentation, build scripts
+    and the directories with package definitions.</para>
+
+    <para>The size of T2 Linux is so small because it is only contains
+    the build scripts and meta information for downloading the kernel
+    and packages from the Internet. The rest of the distribution gets
+    downloaded in the next phase.</para>
+  </sect1>
+  
+  <sect1 id="t2.build.scripts">
+    <title>Using the Scripts</title>
+    
+    <para>Once you have unpacked the distribution you can see directories like:</para>
+    
+    <itemizedlist>
+      <listitem>
+	<para>Documentation - includes the INSTALL and FAQ
+	documents</para>
+      </listitem>
+      <listitem>
+	<para>architecture - contains the definitions particular to a
+	platform</para>
+      </listitem>
+      <listitem>
+	<para>download - where the downloaded tar files will be
+	stored</para>
+      </listitem>
+      <listitem>
+	<para>misc - miscellaneous files including the source of
+	internal helper applications</para>
+      </listitem>
+      <listitem>
+	<para>package - contains the definitions for downloading and
+	installing packages grouped into several repositories</para>
+      </listitem>
+      <listitem>
+	<para>scripts - contains the configuration, download and build
+	scripts</para>
+      </listitem>
+      <listitem>
+	<para>target - contains the target definitions</para>
+    </listitem>
+    </itemizedlist>
+  </sect1>
+  
+  <sect1 id="t2.build.updating">
+    <title>Updating the T2 Source Tree</title>
+    
+    <para>In former (CVS) times the T2 source tree was kept in sync
+    using rsync. However nowadays, with powerful version control
+    systems being invented in the meantime, T2 the sources should be
+    accessed using them. The drawback is that you can not get updates
+    with an extracted tar-ball as base - you need to checkout the
+    sources via the version control system. Currently all source trees
+    of T2 are hosted inside a Subversion repository. The command to
+    get the latest sources via Subversion is:
+
+<screen>svn co http://svn.exactcode.de/t2/trunk t2-trunk</screen>
+
+    Alternatively, for example if you are behind a proxy without
+    WebDAV support or you have an account for write access and
+    plan to contribute a lot of changes back, the https:// protocol
+    must be used. Write access is only offered thru an encrypted
+    channel and this also bypasses proxy services.</para>
+
+<screen>svn co http2://svn.exactcode.de/t2/trunk t2-trunk</screen>
+
+    <para>To access a stable tree in favor of the development trunk,
+    just replace <emphasis>trunk</emphasis> with
+    <emphasis>branches/6.0</emphasis> or an equivalent.  You can even
+    checkout tagged released by using <emphasis>tags/6.0.0</emphasis>
+    - just substitute the version you need.</para>
+    
+    <sect2 id="t2.build.switch">
+      <title>Switching to Another Tree or Version</title>
+      
+      <para>When you already use Subversion to obtain the source you
+      also have the possibility to <emphasis>switch</emphasis> to
+      another branch or tag while just receiving the changes using the
+      svn <emphasis>switch</emphasis> command.</para>
+
+      <para>Let us suppose you have checked out the development trunk
+      but decide you need the controlled stability of the stable
+      trunk: The associated svn command to execute would be:
+
+<screen>svn switch http://svn.exactcode.de/t2/branches/6.0</screen>
+
+      To switch to a specific tagged version you need:
+
+<screen>svn switch http://svn.exactcode.de/t2/tags/6.0.3</screen>
+     </para>
+      
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.build.target">
+    <title>Building the Target</title>
+    
+    <sect2 id="t2.build.target.prepare">
+      <title>Preparing the Build System</title>
+      
+      <para>This section discusses the T2 build system as it has been
+      implemented since version 2.0 and we assume that you want to
+      build an end-users boot-able and install-able target like the
+      generic, minimal, desktop or server target.</para>
+
+      <para>T2 requires just a few prerequisites for building:</para>
+      
+      <itemizedlist>
+	<listitem>
+	  <para>a Bash shell: as the T2 scripts take advantage of some
+	  convenient Bash specific features and shortcuts</para>
+	</listitem>
+	<listitem>
+	  <para>ncurses: for the scripts/Config tool</para>
+	</listitem>
+	<listitem>
+	  <para>cat, cut, sed &amp; co: for the usual shell
+	  scripting</para>
+	</listitem>
+      </itemizedlist>
+	
+      <para>The build scripts will check for the most important tools
+      and print a diagnostic if a tool or feature is found
+      missing.</para>
+	
+      <para>More information can be found in the trouble-shooting
+      section (see <xref linkend="t2.build.troubleshooting"/>) and
+      kernel configuration (see <xref
+      linkend="t2.config.kernel"/>).</para>
+    </sect2>
+    
+    <sect2 id="t2.build.config">
+      <title>Configuring the T2 Build</title>
+
+      <indexterm>
+	<primary>scripts</primary>
+	<secondary>Config</secondary>
+      </indexterm>
+      
+      <para>T2 comes with a menu driven configuration utility even for
+      the build configuration:
+
+<screen>scripts/Config</screen>
+
+      which compiles the configuration program (you need gcc installed
+      for this).</para>
+
+      <figure id="t2.build.config.screenshow">
+	<title>T2 config screenshot</title>
+	<graphic fileref="images/t2-config.png"/>
+      </figure>
+      
+      <para>The most important option (ok - well maybe the most
+      important after the architecture for the build ...) is to choose
+      a so-called 'target'.</para>
+
+      <para>Relevant targets are:
+
+        <itemizedlist>
+	  <listitem>
+	    <para>Generic System</para>
+	  </listitem>
+	  <listitem>
+	    <para>Generic Embedded</para>
+	  </listitem>
+	  <listitem>
+	    <para>Exact Desktop System</para>
+	  </listitem>
+	  <listitem>
+	    <para>Archivista (Scan-)Box</para>
+	  </listitem>
+	  <listitem>
+	    <para>Sega Dreamcast Console</para>
+	  </listitem>
+	  <listitem>
+	    <para>Psion Windermere PDA</para>
+	  </listitem>
+	  <listitem>
+	    <para>Reference-Build for creating *.cache files</para>
+	  </listitem>
+	  <listitem>
+	    <para>Wireless Router (experimental!)</para>
+	  </listitem>
+	</itemizedlist>
+
+      </para>
+      
+      <para>Most of the targets have a customization option. The
+      "Generic System" customization looks like this:
+
+    <itemizedlist>
+	  <listitem>
+	    <para>No package preselection template</para>
+	  </listitem>
+	  <listitem>
+	    <para>Minimalistic package selection</para>
+	  </listitem>
+	  <listitem>
+	    <para>Minimalistic package selection and X.org</para>
+	  </listitem>
+	  <listitem>
+	    <para>Minimalistic package selection, X.org and basic desktop</para>
+	  </listitem>
+	  <listitem>
+	    <para>A base selection for benchmarking purpose</para>
+	  </listitem>
+	</itemizedlist>
+
+      </para>
+
+      <para>Also depending on the target type the distribution media
+      can be selected. For the "Generic System":
+
+    <itemizedlist>
+	  <listitem>
+	    <para>Install CD / disk</para>
+	  </listitem>
+	  <listitem>
+	    <para>Live CD</para>
+	  </listitem>
+	  <listitem>
+	    <para>Just package and create isofs.txt</para>
+	  </listitem>
+	  <listitem>
+	    <para>Distribute package only</para>
+	  </listitem>
+	</itemizedlist>
+
+      </para>
+
+      <para>If you want to alter the package selection (performed by
+      the target) this is finally possibly at this stage, under the
+      expert menu. The deselected packages are also not downloaded
+      from the Internet.</para>
+
+      <para>So now we start configuring the target that will build the
+      packages for the system:
+
+<screen>scripts/Config</screen>
+      </para>
+
+      <para>The most useful options in scripts/Config are:
+
+    <itemizedlist>
+	  <listitem>
+	    <para>Always abort if package-build fails: Deselect
+	    normally, so your build continues (there are always
+	    failing packages.</para>
+	  </listitem>
+	  <listitem>
+	    <para>Retry building broken packages: When starting a
+	    rebuild (after fixing a package) the build retries the
+	    packages it could not build before.</para>
+	  </listitem>
+	  <listitem>
+	    <para>Disable packages which are marked as broken: When
+	    checked T2 will not try to build the packages that have
+	    errors (as noted in the cache file see <xref
+	    linkend="t2.package.cache"/>)</para>
+	  </listitem>
+	  <listitem>
+	    <para>Always clean up src dirs (even on pkg fail): Select
+	    when you need the disk space - though it can be useful to
+	    have the src dir when you need to troubleshoot.</para>
+	  </listitem>
+	  <listitem>
+	    <para>Print Build-Output to terminal when building: Select
+	    for exiting output.</para>
+	  </listitem>
+	  <listitem>
+	    <para>Make rebuild stage (stage 9): Select only if you
+	    have too much CPU power or are paranoid to solve rare
+	    dependency problems between packages. The downside is a
+	    doubled total build time - and should normally not be
+	    necessary.</para>
+	  </listitem>
+	</itemizedlist>
+
+    </para>
+    </sect2>
+    
+  <sect2 id="t2.build.download2">
+      <title>Downloading the Package Sources</title>
+      
+      <para>Now the auto-build-system has a config to use and can so
+      determine which packages are requested to be downloaded and
+      build. The scripts/Download contains the functionality to
+      perform the downloads - and when started with the -required
+      option it only fetches the sources needed by the given
+      config.</para>
+
+      <indexterm>
+	<primary>scripts</primary>
+	<secondary>Download</secondary>
+      </indexterm>
+      
+      <screen>scripts/Download -required</screen>
+      
+      <para>Downloads the selected packages with which you can build a
+      running system. See <xref linkend="t2.download.tips"/> for some
+      tips.</para>
+
+      <para>Downloading the full sources for the various packages used
+      may takes a while - depending on how fast you can move up to 2Gb
+      through your Internet connection. While waiting you may want to
+      go out, sleep, work and go through that routine again.</para>
+
+      <para>The Download script may complain you have the wrong
+      version of bash and you need curl.</para>
+
+      <para>The full options of scripts/Download are
+      <footnote><para>Run scripts/Download without options to get
+      the usage:</para></footnote>:
+
+<screen>Usage:
+
+ scripts/Download [options] [ Package(s) ]
+ scripts/Download [options] [ Desc file(s) ]
+ scripts/Download [options] -repository Repositories
+ scripts/Download [options] { -all | -required }
+
+ Where [options] is an alias for:
+    [ -cfg &lt;config&gt; ] [ -nock ]  [ -alt-dir &lt;AlternativeDirectory&gt; ]
+    [ -mirror &lt;URL&gt; | -check ]  [ -try-questionable ]  [ -notimeout ]
+    [ -longtimeout ]  [ -curl-opt &lt;curl-option&gt;[:&lt;curl-option&gt;[:..]] ]
+    [ -proxy &lt;server&gt;[:&lt;port&gt;] ] [ -proxy-auth &lt;username&gt;[:&lt;password&gt;] ]
+    [ -copy ] [ -move ]
+
+ On default, this script auto-detects the best T2 SDE mirror.
+
+ Mirrors can also be a local directories in the form of 'file:///&lt;dir&gt;'.
+
+ scripts/Download -mk-cksum Filename(s)
+ scripts/Download [ -list | -list-unknown | -list-missing | -list-cksums ]</screen>
+
+      </para>
+
+    </sect2>
+    
+    <sect2 id="t2.download.mirrors">
+      <title>Mirrors</title>
+
+      <indexterm>
+	<primary>mirror</primary>
+      </indexterm>
+      
+      <para>Quite a few contributors and sponsors of T2 Linux have
+      created mirrors for source tar balls - scripts/Download tries
+      to select the fastest mirror.</para>
+      
+      <para>Sometimes a mirror is incomplete or out-of-date. The
+      Download scripts will try to fetch the file from the original
+      upstream location in that case. If too many files are missing on
+      the mirror that was selected, you might however like to choose
+      another one.</para>
+
+      <para>To select a specific mirror:
+
+<screen>scripts/Download -mirror http://www.ibiblio.org/pub/linux/t2/7.0</screen>
+
+        </para>
+      
+      <para>Running scripts/Download with the argument '-mirror
+      none' will instruct the scripts to always fetch the sources from
+      the original site, first.</para>
+      
+      <sect3 id="t2.download.missing-files">
+	<title>Missing Files?</title>
+	
+	<para>All packages get downloaded from the original
+	locations. For each package the T2 distribution maintains a
+	package file which points to the ftp, http or cvs location and
+	filename.  Sometimes the download site changes, more often the
+	version numbering of a file changes. At that point the package
+	file needs to be edited. After a successful download you may
+	send the patch to the T2 Linux maintainers - so others get an
+	automatic update.</para>
+
+	<para>Missing packages are not necessarily a problem. If you
+	are aware what a package does and you know you don't actually
+	need it you can pretty much ignore the error. For base
+	packages it is usually a good idea to fetch them all.</para>
+
+	<para>It may be useful to download the most recent version of
+	T2 (stable or development) since it will reflect the most
+	recent state of the original packages.</para>
+
+	<para>To actually find which files are missing run:</para>
+
+<screen>scripts/Download -list-missing</screen>
+
+      </sect3>
+      <sect3 id="t2.download.urlfix">
+	<title>Fixing URLs</title>
+	
+	<para>If a package fails to download because it is not on a
+	mirror and the original has moved away you may want to fix the
+	URL in the package directly.</para>
+
+	<para>Find the package in the package directory and modify the
+	package.desc directly. Update the URL in the [D] field and set
+	the checksum to 0. Also update the [V] version field if it has
+	changed.</para>
+	
+	<para>With the fixed URL re-run:
+
+<screen>scripts/Download -required</screen>
+
+        or if there are some more files in the queue, downloading
+        explicitly a single package can be forced with:
+
+<screen>scripts/Download packagename</screen>
+
+        If it worked and the package builds fine (see <xref
+        linkend="t2.build"/>) it is recommended you send in the change
+        to the T2 maintainers - to prevent other people from going
+        through the same work (see <xref linkend="t2.package.diff"/>
+        for more information). The one thing you'll have to do is to
+        fix the checksum in the [D] field (see <xref
+        linkend="t2.download.checksum"/>).</para>
+      </sect3>
+      
+      <sect3 id="t2.download.checksum">
+	<title>Checksum</title>
+	
+	<para>The Download script has a facility for checking the
+	integrity of the downloaded packages. It does so during each
+	download - but you can also run a check manually:
+
+<screen>scripts/Download -check -all</screen>
+
+        iterates over all the packages and checks for matching
+        checksums. If a package got corrupted, in one way or the
+        other, it returns an error.</para>
+	
+	<para>To get the checksum of a single tarball:
+
+<screen>scripts/Download -mk-cksum path</screen>
+
+        Or use the even easier script which creates a checksum patch
+        automatically:
+
+<screen>scripts/Create-CkSumPatch package > cksum.patch
+patch -p1 &lt; cksum.patch</screen>
+
+        in short just:
+
+<screen>scripts/Create-CkSumPatch package | patch -p1</screen>
+
+        </para>
+    
+      </sect3>
+    
+    </sect2>
+      
+    <sect2 id="t2.download.tips">
+      <title>Download Tips</title>
+	
+      <para>Before starting a new download it is an idea to create the
+      'download' directory and mount it from elsewhere (a symbolic
+      link will not work with the build phase later, though in this
+      stage it will do) this way you can use the same repository when
+      moving to a new version of the T2 Linux scripts (check <xref
+      linkend="t2.download.unknown"/>).</para>
+
+      <sect3 id="t2.download.unknown">
+	<title>Unknown Files</title>
+	
+	<para>When going through several cycles of upgrading and
+	downloading packages (see also <xref
+	linkend="t2.download.tips"/>) you'll find the same packages
+	with different versions of tarballs in your download tree
+	(e.g.  apache-1.25 and apache-1.26). The older files
+	(apache-1.25) are considered obsolete and are named 'unknown
+	files' in T2 jargon.</para>
+	
+<screen>scripts/Download -list-unknown</screen>
+
+	<para>To remove unknown files (treating it as white-space
+	separated list and only pass thru column 2):
+
+<screen>scripts/Download -list-unknown | cut -d ' ' -f 3 | xargs rm -vf</screen>
+
+        or since recently just:
+
+<screen>scripts/Cleanup -download</screen>
+
+        </para>
+      </sect3>
+    </sect2>
+    
+    <sect2 id="t2.build.compilation">
+      <title>The Actual Compilation Phase</title>
+      
+      <para>To build the target you must be root. There are two main
+      reasons why this is currently the case:</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>For normal builds with a native compilation phase
+	  chroot is used. However, the chroot system-call commonly is
+	  only allowed for the root user.</para>
+	</listitem>
+	
+	<listitem>
+	  <para>Various files require special permissions as well as
+	  probably specific owner and group settings for the resulting
+	  system work properly. However, those ownership and
+	  permission settings are only allowed to set for the root
+	  user.</para>
+	  
+	  <para>To compensate for this, pre-load libraries, such as
+	  implemented with fakeroot, could be used to intercept and
+	  fake this meta-data while building, and this also is on the
+	  future T2 roadmap to integrate.</para>
+	</listitem>
+      </itemizedlist>
+      
+      <indexterm>
+	  <primary>scripts</primary>
+	<secondary>Build-Target</secondary>
+      </indexterm>
+      
+      <para>To build the target, execute as root:</para>
+      
+      <screen>scripts/Build-Target</screen>
+
+      <para>which starts building all the stages (see <xref
+      linkend="t2.build-stages"/>). The output of the build can be
+      found in build/$SDECFG_ID/TOOLCHAIN/logs/.</para>
+    
+    </sect2>
+    
+    <sect2 id="t2.build.errors">
+      <title>Build Errors</title>
+
+      <para>In the stable series this happens only rarely - but it
+      might happen sometimes in the development series. Packages can
+      break because they go out-of-date (dependencies do not match) or
+      because the downloaded package mismatches the build scripts, or
+      maybe, because there is something wrong with your build
+      environment.</para>
+
+      <para>The output of the build process of the individual packages
+      is captured in the directory build/$SDECFG_ID/var/adm/logs/.
+      All the packages with errors show the .err extension.</para>
+      
+      <para>A tabular overview is provided by
+      scripts/Create-ErrList, like for example:</para>
+
+      <screen>Error logs from live-7.0-trunk-desktop-x86-pentiumpro:
+
+ [5] network/pilot-link                  [5] emulators/qemu
+
+876 builds total, 874 completed fine, 2 with errors.</screen>
+
+<!-- TODO: more Create-ErrList features explained, as well as Target -job -->
+
+      <para>Check the content of the error files to see if you can fix
+      the problem (see also <xref
+      linkend="t2.build.package.fix"/>).</para>
+
+      <para>Before starting a rebuild select 'Retry Broken Packages'
+      in scripts/Config.</para>
+    </sect2>
+    
+    <sect2 id="t2.build.cleanup">
+      <title>Cleanup</title>
+      
+      <indexterm>
+	<primary>scripts</primary>
+	<secondary>Cleanup</secondary>
+      </indexterm>
+      
+      <para>Every package gets built in a directory named
+      src.$pkg.$config.$id To remove these packages (if there is an
+      error it can be useful to check the content of the partial
+      build!) usescripts/Cleanup.</para>
+
+      <warning>
+	<para>Simply type 'scripts/Cleanup' to remove the src.*
+	directories. DO NOT REMOVE THEM BY HAND! This directories may
+	contain bind mounts to the rest of the source tree and it is
+	possible that you are going to remove everything T2 SDE base
+	directory if you make a simple 'rm -rf' to remove them!</para>
+      </warning>
+      
+      <para>By passing --build the script will also remove existing
+      builds from inside the build/ directory, --cache will ccache
+      related cache directories from inside build/ and last but not
+      least --full remove the entire generated content in the build/
+      directory.</para>
+
+    </sect2>
+    
+    <sect2 id="t2.build.summary">
+      <title>Build Summary</title>
+      
+      <para>Now you should have a ready system build. If you selected
+      "Install CD / disks" or "Live CD" in the configuration phase
+      then you have the <emphasis>Installer</emphasis> also. Since
+      many different targets exist, those targets should share a
+      common installer application. A typical installer needs
+      different things like a embedded C library, many small size
+      binaries and the installer binaries and scripts.</para>
+
+
+      <para>To summarize, a typical cycle to build a T2 target looks
+      like:
+
+<screen>scripts/Config
+scripts/Download
+scripts/Build-Target</screen>
+
+      </para>
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.build.iso">
+    <title>Creating an ISO Image (for CD-ROM Installation)</title>
+
+    <indexterm>
+      <primary>Qemu</primary>
+    </indexterm>
+    <indexterm>
+      <primary>Bochs</primary>
+    </indexterm>
+    <indexterm>
+      <primary>Xen</primary>
+    </indexterm>
+    <indexterm>
+      <primary>ISO</primary>
+    </indexterm>
+    
+    <para>Once your build completed you can turn it into an ISO image
+    using the scripts/Create-ISO script. This ISO can be burned
+    straight to a bootable CD-ROM or DVD, or instantly tested in a
+    virtual machine, such as Qemu, Xen, Bochs, VirtualBox, or
+    VMware. To create the ISO just run<footnote><para>In versions
+    before T2 7.0 Create-ISO did not default to the 'default' config
+    if no config names were specific. For this T2 versions a config
+    name, such as 'default', needs to be passed
+    explicitly.</para></footnote>:</para>
+    
+    <indexterm>
+      <primary>scripts</primary> <secondary>Create-ISO</secondary>
+    </indexterm>
+    
+    <screen>scripts/Create-ISO mycdset</screen>
+    
+    <para>After burning the mycdset_*.iso files to the media the media
+    number one is bootable.</para> </sect1>
+  
+  <sect1 id="t2.build.target.multiple">
+    <title>Building More Than One Target</title>
+    
+    <para>Once comfortable with T2, power users often have more than
+    one target to build, all build related scripts take a '-cfg'
+    argument with a config name. By default the scripts use the config
+    name 'default' if no '-cfg' argument is specified. The calling
+    sequence to build a target named 'kiosk':</para>
+  </sect1>
+
+  <screen>scripts/Config -cfg kiosk
+scripts/Download -cfg kiosk
+scripts/Build-Target -cfg kiosk</screen>
+  
+  <para>And Create-ISO accepts config names accordingly:</para>
+
+  <screen>scripts/Create-ISO mycdset kiosk</screen>
+  
+  <para>Create-ISO allows to sort more than one build into the ISO
+  files, for example to create mixed CPU architecture media or to add
+  a rescue target along the main system:</para>
+
+  <screen>scripts/Create-ISO mycdset kiosk rescue</screen>
+
+  <para>Additional options include:</para>
+  
+  <screen>Usage: scripts/Create-ISO [ -size MB ] [ -source ] [ -mkdebug ] [ -nomd5 ]
+       ISO-Prefix [ Config [ .. ] ]
+
+E.g.: scripts/Create-ISO mycdset system rescue</screen>
+
+  <sect1 id="t2.build.package.single">
+    <title>Building a Single Package</title>
+    
+    <para>If you want to build and install a single package on your
+    system, then the scripts/Emerge-Pkg script will download, build
+    and install a package and all its dependencies. For
+    example:</para>
+    
+    <indexterm>
+      <primary>scripts</primary>
+      <secondary>Emerge-Pkg</secondary>
+    </indexterm>
+    
+<screen>scripts/Emerge-Pkg packagename</screen>
+
+    <para>Emerge-Pkg will also check if the dependencies are installed
+    and up-to-date. However with T2 systems installed from older
+    stable trees this can result in a vast amount of dependencies,
+    including systems tools, scheduled to build which not always might
+    be desired. To avoid this the dependencies to include can be
+    narrowed down by just installing missing dependencies:</para>
+
+<screen>scripts/Emerge-Pkg -missing=only packagename</screen>
+
+    <para>A complete repository, such as gnome2 or e17 (Enlightenment
+    17) can be built at once using the -repository option:</para>
+
+<screen>scripts/Emerge-Pkg -repository gnome2</screen>
+
+    <note><para>Emerge-Pkg with the -repository option does only build
+    <emphasis>selected</emphasis> packages. This is, because some
+    packages - like alternative ghostscript or java variants - are
+    deselection (optional) by default and Emerging a whole mail or
+    printing repository would mess up the existing packages and cause
+    so called shared files.</para></note>
+
+    <para>Emerging a whole repository, the option controlling what to
+    do with yet uninstalled, missing packages come handy, if you - for
+    example - have already specifically installed some some packages
+    out of a big repository and just want to update them:</para>
+
+<screen>scripts/Emerge-Pkg -missing=no -repository e17</screen>
+
+    <para>If you know what you do, dependency resolution can be disabled
+    entirely:</para>
+
+<screen>scripts/Emerge-Pkg -deps=none packagename</screen>
+  
+    <para>Further options for scripts/Emerge-Pkg are:
+
+<screen>Usage: Emerge-Pkg [ -cfg &lt;config&gt; ] [ -dry-run ] [ -force ] [ -nobackup ]
+                  [ -consider-chksum ] [ -norebuild ]
+                  [ -deps=none|fast|indirect ] [ -missing=yes|no|only ] [ -download-only ]
+                  [ -repository repository-name ] [ -system ] [ pkg-name(s) ]
+
+pkg-name(s) are only optional if a repository is specified.
+</screen>
+
+    </para>
+    
+    <para>Internally the Emerge-Pkg script runs the
+    scripts/Build-Pkg as backend, which can alternatively be run
+    manually, likewise. However keep in mind that the Build-Pkg script
+    does neither download the package files nor check for
+    dependencies! So for example:
+
+<screen>scripts/Download packagename
+scripts/Build-Pkg packagename</screen>
+
+    The results of the build can be found in
+    /var/adm/log/9-packagename.log - or with the .err extension if it
+    failed.</para>
+
+    <para>Usually you want to pass the option '-update' since this
+    will backup modified configuration files and restore them after
+    the package build finished.</para>
+
+    <para>Options for scripts/Build-Pkg are:
+
+<screen>Usage: scripts/Build-Pkg [ -0 | -1 | -2  ... | -8 | -9 ]
+                           [ -v ]  [ -xtrace ]  [ -chroot ]
+                           [ -root { &lt;rootdir&gt; | auto } ]
+                           [ -cfg &lt;config&gt; ]  [ -update ]
+                           [ -prefix &lt;prefix-dir&gt; ]  [ -norebuild ]
+                           [ -noclearsrc ]
+                           [ -id &lt;id&gt; ]  [ -debug ]  pkg-name(s)</screen>
+
+    </para>
+
+    <para>Both Emerge-Pkg as well as Build-Pkg will build and install
+    a package into the root of the filesystem you initiate it in, that
+    is it overwrites the ones currently installed.</para>
+  
+  </sect1>
+  
+  <sect1 id="t2.build.troubleshooting">
+    <title>Troubleshooting</title>
+    
+    <sect2 id="t2.build.troubleshooting.chroot">
+      <title>chroot: cannot run command `bin/bash'</title>
+      
+      <para>Usually a shared object / linker problem of the freshly
+      bootstrapped system or the resulting executables are for another
+      CPU architecture. In the later case the "This is a cross build"
+      option was not selected in the Config which disables the native
+      build stage and cross builds as much as possible.</para>
+      
+      <para>It could also be the case that the bash package is not
+      present in the package selection, while the T2 scripts build
+      scripts are executed in the chroot environment and require the
+      bash.</para>
+      
+    </sect2>
+
+    <sect2 id="t2.build.troubleshooting.shared-files">
+      <title>Found shared files with other packages:</title>
+      
+      <para>In T2 we decided that any file can only be belong to a
+      single package. If a second package overwrites or alters a file
+      this is detected by the build system and complained about at the
+      end of a package build.</para>
+      
+      <para>Depending on the type of the file (executable or config
+      file) this might be a more or less serious problem. Shared file
+      errors can be ignored by the developer in the beginning of a new
+      target development, but should be addressed properly sooner than
+      later.</para>
+      
+      <para>Possible solutions range from removing the package
+      installing the duplicate file if they are alternatives for the
+      same function, or renaming a file to not cause a
+      collision.</para>
+      
+      <para>Packages selected by default in T2 must not cause such a
+      "shared file" conflict!</para>
+      
+    </sect2>
+    
+    <sect2 id="t2.build.troubleshooting.command-not-found">
+      <title>Command Not Found</title>
+
+      <para>When the build breaks in stage 0 or 1 because of a command
+      not found on your system you may need to build the package
+      containing the command manually (see <xref
+      linkend="t2.build.package.manual"/> for more information on
+      building packages by hand).</para>
+    </sect2>
+    
+    <sect2 id="t2.build.troubleshooting.bind-mount">
+      <title>mount: you must specify the filesystem type</title>
+      
+      <para>Older versions of mount do not accept the '--bind'
+      option. Either update mount to a newer version or change the
+      '--bind ' option to '-o bind'.</para>
+    </sect2>
+    
+    <sect2 id="t2.build.troubleshooting.free-space">
+      <title>Free Disk Space</title>
+      
+      <para>Another issue regarding building is that you need quite a
+      bit of free disk space. After downloading all packages (2GB) you
+      need another 5 Gb to build everything. Thereafter you'll need
+      enough space to install the newly built system on.</para>
+    </sect2>
+    
+    <sect2 id="t2.build.troubleshooting.non-t2">
+      <title>Building On a non-T2 Systems</title>
+      
+      <para>Non-T2 installation take a little more preparation in
+      general.</para>
+
+      <para>The most important reason being that some current Linux
+      distributions like RedHat or SuSE contain broken versions of one
+      of the intensively used utilities like sed, awk, tar or
+      bash.</para>
+
+      <para>The first time you start building T2 on a non-T2
+      distribution it may be wise not to build in your normal working
+      environment because it may require up-to-date versions from sed,
+      awk, tar or bash, but to dedicate a special build host.</para>
+
+      <para>If you have enough disk space, is might be easier to
+      download one of the T2 rescue binaries (&lt;; 100 Mb) which give
+      you a full build system.  Install and boot into it and you are
+      almost done. It may be even easier if you have a binary T2 image
+      on CD-ROM and just install it. T2 builds easily on an existing
+      T2 installation.</para>
+    </sect2>
+    
+    <sect2 id="t2.build.troubleshooting.floppy">
+      <title>Bootfloppy Images</title>
+      
+      <para>If you don't succeed rebuilding your kernel and booting up
+      because of one reason or another there is one more
+      strategy. Download the T2 floppy images so you can have a look
+      at your disk partitions.</para>
+    </sect2>
+    
+    <sect2 id="t2.build.package.manual">
+      <title>Building a Required Package Manually</title>
+      
+      <para>To get a build system up to date for downloading and
+      building T2 it is sometimes necessary to update utilities like
+      bash or the \package{coreutils} package on your build
+      system.</para>
+
+      <para>If T2 is already installed and all tools are up-to-date
+      for Download and Build-Pkg you are in luck -
+      just use them. If not, you need to download and build the
+      package manually. In that case it is wise to check the T2 build
+      description and configuration of the package:</para>
+
+      <para>First locate the package in one of the repositories:
+
+<screen>ls package/*/coreutils</screen>
+
+      which most probably will yield: 'package/base/coreutils'. You
+      should then use the 'D' tag in its '.desc' file to fetch the
+      tar-ball.</para>
+
+      <para>As the next step you should verify if a '.conf' file is
+      present and uses some important build configuration which you
+      should use in your own manual build, too.</para>
+
+      <para>Finally you build the package, for example like:
+
+<screen>tar xvf coreutils-5.0.tar.bz2
+cd coreutils-5.0
+./configure --prefix=/usr
+make
+make install</screen>
+
+      Additionally you might like to use '--prefix=/usr/local' or
+      '--prefix=/opt/package' to not mess you build system and apply
+      patches from the packages configuration directory in order to
+      fix important bugs.</para>
+
+    </sect2>
+    
+    <sect2 id="t2.build.package.fix">
+      <title>Fixing Broken Packages</title>
+      
+      <para>With every version of T2 you will sometimes encounter the
+      phenomenon of broken packages. This is result of the evolution
+      path: packages get updated and new features, architectures, OS
+      kernels or alternative C libraries added. Some combinations
+      might just not yet build or new regressions appear as a result
+      of related changes. Package might fail to build because of
+      dependency changes, or just bugs.</para>
+
+      <indexterm>
+	<primary>debug.sh</primary>
+      </indexterm>
+      <indexterm>
+	<primary>debug.buildenv</primary>
+      </indexterm>
+      
+      <para>T2 provides some useful tools to help you fix broken
+      builds. When a package fails to build you'll see the a package
+      build directory src.packagename.uniqu-id remaining in your T2
+      tree. This contains the full build tree for a package until the
+      point the compile stopped. In this tree you'll find a file named
+      debug.sh, when run it will place you in the shell inside the
+      chroot sandbox with exactly the same environment and wrappers
+      when the package was build (among others the debug.sh sources
+      the debug.buildenv, which contains the environment).</para>
+      
+      <para>In order to debug the failure you usually change into the
+      package directory:
+
+      <screen>cd some_pkg-$ver</screen>
+
+      and then run make with the arguments used by T2 build:
+
+      <screen>eval $MAKE $makeopt</screen>
+ 
+      or if the it failed at install time:
+
+      <screen>eval $MAKE $makeinstopt</screen>
+      </para>
+
+      <note><para>If the package is not based on classic Makefiles
+      this step will obviously differ.</para></note>
+
+      <indexterm>
+	<primary>fixfile</primary>
+      </indexterm>
+      <indexterm>
+	<primary>fixfilediff</primary>
+      </indexterm>
+      
+      <para>In order to modify files and create a patch with the
+      differences at the end two helpers are provided: fixfile will
+      create a backup file (with the extension .vanilla) and run an
+      editor on the file, while fixfilediff can be used to obtain the
+      differences at the end of the debug session:</para>
+
+      <screen>fixfile Makefile
+fixfilediff</screen>
+      
+      <para>The newly created patch can then placed in the package
+      directory with the .patch extension in order to apply it
+      automatically:</para>
+      
+      <screen>cd ..
+fixfilediff  > ../package/repository/package/fix-topic.patch</screen>
+      
+      <note><para>In this example 'cd ..' is used to change back to
+      the directory where the package was extracted in. This is
+      necessary as the T2 build-system applies the patch with 'patch
+      -p1' and thus the patch program removes the first directory name
+      from the filesnames inside the patch.</para> <para>Also the
+      directory name is preferred in favour of just a . as first
+      directory name in the patch as usually nicely indicates for
+      which package version the patch was created for.</para></note>
+      
+    </sect2>
+  </sect1>
+  
+  <sect1 id="t2.build.tips">
+    <title>Tips</title>
+    
+    <sect2 id="t2.build.standard-first">
+      <title>Build a Standard Edition First</title>
+
+      <para>If you get stuck with a cross compile, or one of the more
+      minimal C libraries or very minimal package selection, try
+      building a standard 'no special optimisation, no frills'
+      configuration, first. The major target configurations get build
+      (and therefore tested) by most people and you can get used to T2
+      before you continue with a more specialized configuration.</para>
+
+      <para>If this fails check, the T2 mailing list for
+      messages/queries regarding the failure.</para>
+    </sect2>
+    
+    <sect2 id="t2.build.watch">
+      <title>Watch Progress</title>
+      
+      <para>It is useful to configure T2 for writing to terminal
+      whilst doing the build: In scripts/Config select:</para>
+
+<screen>[*] Retry building broken packages
+[ ] Always clean up src dirs (even on pkg fail)
+[*] Print Build-Output to terminal when building</screen>
+
+      <para>Or just running tail -f on the current log file.</para>
+
+      <para>In addition one can run watch in a different terminal on
+      the list of files in build/default-*/root/var/adm/logs:
+
+<screen>watch -d ls -lt build/default-*/root/var/adm/logs</screen>
+
+      </para>
+    </sect2>
+    
+    <sect2 id="t2.build.cluster">
+      <title>Cluster Build - the Build Speedup</title>
+
+      <para>Recent versions of T2 support some form of a distributed
+      build in a cluster using distcc and icecream.</para>
+      <para>For less esoteric setups simply using RAID 0 (striping
+      mode) using two IDE drives over two IDE channels speeds a build
+      up significantly. This is because building packages is IO
+      intensive.</para>
+
+      <!-- TODO: add content -->
+      
+      <para>An obvious optimisation is to select a target which builds
+      the fewest packages, exclude building unneeded packages and to
+      skip the final rebuild (stage 9).</para>
+    </sect2>
+    
+    <sect2 id="t2.build.nice-level">
+      <title>Set the 'nice' Level</title>
+
+      <para>If your build process should allow other users to make
+      full use of the system, you can set the nice level to the lowest
+      priority. e.g.
+
+<screen>nice -n 19 scripts/Build-Target</screen>
+
+      secures the build process won't saturate the CPU when other
+      users need it (IO resources may be exhausted temporarily
+      though).</para>
+    </sect2>
+    
+  </sect1>
+</chapter>  
+  
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

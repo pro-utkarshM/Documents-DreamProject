@@ -1,0 +1,365 @@
+
+\renewcommand{\rmdefault}{cmss}
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{a4,german}
+\usepackage[latin1]{inputenc}
+
+\usepackage{multicol}
+\usepackage{url}
+\usepackage{color}
+\usepackage{graphicx}
+
+\usepackage{wrapfig}
+
+\setlength{\oddsidemargin}{-6mm}
+\setlength{\evensidemargin}{-6mm}
+\setlength{\topmargin}{-15mm}
+\setlength{\textwidth}{17cm}
+\setlength{\textheight}{25cm}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1.5ex}
+\newlength{\embfigwidth}
+
+\definecolor{MyLightGreen}{rgb}{0.51, 0.93, 0.57} %color: #84EF92
+\definecolor{MyLightBlue}{rgb}{0.57, 0.88, 1.0} %color: $93E2FF
+\setlength{\embfigwidth}{7.85cm}%{\linewidth minus1cm}
+
+\renewcommand{\rmdefault}{cmss}
+
+\newcommand{\hosection}[1]{\begin{center}{\large \textbf{#1}}\end{center}}
+\newcommand{\hoitem}[1]{\emph{#1}:}
+\newcommand{\hodeco}[1]{\begin{wrapfigure}[3]{l}{2cm}\
+	 \vspace*{-0.87cm}\\ \includegraphics*[scale=0.56, angle=-90]{#1} \
+	 \end{wrapfigure}}
+
+
+\begin{document}
+
+\pagestyle{empty}
+
+
+
+% headline
+\begin{flushright}
+{ \Huge \textbf{ 
+	System Development Environment} \vspace*{0.2cm}\\
+  \Large \textbf{ 
+	www.t2-project.org\hspace*{2cm}}
+}
+\end{flushright}
+% we do the logo here and raise it to the height of the major headline
+\vspace*{-2.8cm}\hspace*{-0.05cm}\includegraphics*[scale=0.213]{t2-logo.eps}
+
+
+\begin{multicols}{2}
+
+%\hosection{More than a distribution}
+\hosection{Mehr als eine Distribution}
+
+\hodeco{deco-3.eps}
+%T2 is not just a common Linux distribution - it is a flexible
+%open source build kit for Linux based Systems supporting the creation
+%of custom distributions with bleeding edge technology. Whether embedded
+%systems with low memory footprint, secure and highly specialized
+%server setups or complete desktop systems featuring a rich set of
+%applications - the modular framework of T2 can easily be adapted to
+%fit your needs.
+T2 ist nicht lediglich eine Linux Distribution sondern ein
+flexibler Baukasten, mit dem sich unter Verwendung modernster Technologien
+hochangepasste Linux basierte Systeme erstellen lassen. Ob eingebettete Syteme
+mit kleinem Speicherverbrauch, hochsichere spezialisierte Server
+oder komplette Desktop Systeme mit einer reichen Auswahl an Applikationen -
+das modulare Framework von T2 kann einfach an Ihre persönlichen Bedürfnisse
+angepasst werden.
+
+%\hoitem{Philosophy} A community driven development process ensures
+%rapid evolution of the tool kit. Both free and professional users have
+%been attracted by the GPL'ed build system and created a large set of
+%extensions and packages for T2. Industrial spin-off projects benefit
+%from the steadily growing user base of the project by gaining access
+%to an enormous amount of resources and innovations.
+\hoitem{Philosophie}
+Die unter der GPL stehende Umgebung ist sowohl für freie als auch für
+professionelle Anwender attraktiv, welche stetig neue Erweiterungen
+und Pakete zu T2 beisteuern. Diese von der Community getragene
+Entwicklung sorgt f"ur eine schnelle Evolution des Toolkits. Somit
+profitieren auch industrielle Projekte von der st"andig wachsenden
+Nutzerzahl, indem sie Zugriff auf einen reichen Schatz von Resourcen
+und Innovationen erhalten.
+
+%\hoitem{Standard compliant} Packages are kept clean and distribution
+%specific patches are avoided.  Furthermore T2 adheres to the
+%Filesystem Hierarchy Standard (FHS) and Linux Standard Base
+%(LSB). Package configurations are kept simple with focus on
+%security. Inconsistencies and historical cruft is evaded by making as
+%few assumptions about the past as possible.
+\hoitem{Standartkompatibel}
+Anwendungen werden im originalen Zustand belassen und
+distributions-spezifische Patches vermieden. T2 folgt dem
+Filesystem Hierarchy Standard (FHS) und der Linux Standard Base
+(LSB). Die Konfigurationen sind mit Fokus auf Sicherheit angelegt und
+einfach gehalten. Indem wenig Annahmen "uber die Vergangenheit
+getroffen werden, werden Anachronismen vermieden.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\hosection{The Build Kit}
+\hosection{Das Build Kit}
+
+\hodeco{deco-6.eps}
+%T2 features an automated build system which manages the whole
+%compilation process including an optional installer CD creation.
+%After initial creation of the build-toolchain, all packages are built
+%inside a sandbox environment to monitor installed files and
+%dependencies automatically. Optionally there can be a cross-build
+%beetween different architectures - use the best machines to compile
+%for a thin target architecture. The build system can also modify the
+%execution of various programs to provide a generic way to transform
+%control compiler flags and file manipulations.
+T2 besitzt ein automatisiertes Build-System welches den gesamten
+Prozess der "Ubersetzung durchf"uhrt und nach Bedarf auch
+Installations-CDs erzeugt. Zuerst wird eine Toolchain erstellt, mit
+der dann alle Pakete in einer Sandbox gebaut werden um erzeugte
+Dateien und Abh"angigkeiten zu protokollieren. Ein Cross-Build
+zwischen verschiedenen Architekturen ist m"oglich - einfach mit
+leistungsstarken Maschinen f"ur eine kleine Zielarchitektur
+compilieren. Das Build-System kann in die Ausf"uhrung verschiedener
+Programme eingreifen und bietet generische Mechanismen zur
+Transformation von Compiler-Optionen und zur Manipulation von Dateien.
+
+%\hoitem{Framework} The T2 framework allows for the creation of individual custom
+%build target definitions, including the package selection and C library
+%to be used and to customize their configuration. The build system
+%merges all those definitions together and generates a build
+%process. Dependencies of packages are traced and resolved during the
+%compilation process to disburden the user. There is full control of
+%the build output such as to create a installable CD or ROM images for
+%embedded use or distributing the compiled system over the network.
+\hoitem{Framework}
+Das T2 framework erm"oglicht es, individuelle Zielsysteme zu
+definieren, unter anderem durch Auswahl von Paketen und zu
+verwendender Standart-Bibliothek, Anpassung von Konfigurationen
+etc. Das Build-System kombiniert all diese Definitionen und generiert
+einen "Ubersetzungsprozess. Abh"angigkeiten werden dabei verfolgt um
+den Anwender zu entlasten. Der Entwickler erh"alt die volle Kontrolle
+"uber das erstellte System, beispielsweise lassen sich installierbare
+CDs oder ROM-Images erstellen oder "ubersetzte Pakete via Netzwerk
+weiterverteilen.
+
+%\hoitem{Portability} Due to the nature of the clean source packages and its
+%automatic build system, T2 is highly portable. It includes support for
+%ARM, Alpha, HPPA, HPPA64, ia64, MIPS, PowerPC, PowerPC64, SPARC, Ultra
+%SPARC and x86, x86-64. The user can add definitions for other
+%architectures to the SDE if desired.
+\hoitem{Portierbarkeit}
+Aufgrund der sauberen Quellpakete und des automatisierten
+Build-Systems ist T2 hochgradig portabel. Zu den bereits unterst"utzten
+Architekturen geh"oren ARM, Alpha, HPPA, HPPA64, ia64, MIPS, PowerPC,
+PowerPC64, SPARC, Ultra SPARC, SuperH und x86, x86-64. Das SDE l"asst
+sich vom Anwender auf andere Zielarchitekturen erweitern.
+
+%\hoitem{Optimization} Since the automatic build system controls the whole
+%build, it can transform compiler arguments used by the various
+%packages on-the-fly. This allows adapting the optimization for the
+%specified CPU platform, thus accelerating your product over its
+%current limits.
+\hoitem{Optimierung}
+Da das Build-System die gesamte "Ubersetzung kontrolliert, kann es von
+verschiedenen Paketen genutzte Compiler-Optionen zur Laufzeit
+transformieren. Somit k"onnen die Einstellungen auf die spezifizierte
+Plattform optimiert werden, um Ihr Produkt "uber derzeitige Grenzen zu
+beschleunigen.
+
+%\hoitem{Packaging system} Unlike competing packaging systems like RPM or DEB,
+%the format used in T2 does not require the developer to write
+%code. Instead, an ASCII tag format is used to specify the package
+%parameters - the automated build system does the work.
+\hoitem{Paket-System}
+Anders als bei konkurierenden Paket-Systemen wie RPM oder DEP muss der
+Entwickler bei T2 keinen Code schreiben um Pakete zu
+erstellen. Stattdessen wird ein einfaches ASCII Format verwendet, mit
+dem sich die Spezifikationen und Einstellungen eines Paketes festlegen
+lassen - den Rest der Arbeit erledigt das automatisierte Build-System.
+
+\colorbox{MyLightBlue}{
+\begin{minipage}{\embfigwidth}
+\includegraphics*[scale=0.95, angle=-90]{t2-overview.eps}
+{ \small \emph{% Choose your desired architecture and setup the build
+%mode to generate your favored system. Benefit from the huge set of
+%maintained targets and packages that are available within T2. After
+%the build, T2 can create a set of bootable CDs or generate a ROM-Image to distribute the
+%system.
+W"ahlen Sie Ihre gew"unschte Architektur und konfigurieren Sie die
+Art, nach der ihr favorisiertes System erstellt werden
+soll. Profitieren sie dabei von der gro"sen Anzahl gewarteter Pakete
+und Targets, die bereits in T2 enthalten sind. Nach der "Ubersetzung
+kann T2 bootbare CDs oder ROM-Images erstellen, mit denen das System
+verteilt wird.}}
+\end{minipage}
+}
+
+
+%\hoitem{Ready to start} T2 already ships with over 1400 up-to-date packages
+%providing a solid base for your product, including the X.Org windowing
+%system, major desktop environments like KDE, GNOME and many server
+%and security additions.
+\hoitem{Bereit zum Loslegen}
+T2 bietet "uber 2100 aktuelle Pakete als solide Basis f"ur Ihr
+Produkt. Darin bereits enthalten: X.Org, bekannte Desktop Umgebungen
+wie KDE und Gnome sowie viele Server und Security Anwendungen.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\hosection{Features}
+
+\hodeco{deco-1.eps}
+%Due to its flexibility and scalability T2 is an interesting SDE for
+%embedded systems. But in many cases the goal of the user is just
+%creating a good custom Linux distribution - it is a T2 philosophy to
+%deliver vanilla packages and standard compliant installations.
+%Surely, an excellent distribution
+%needs more than kernel, libraries and software. T2 comes with many
+%features that make it an easy to maintain, highly configurable and
+%comfortable system.
+Aufgrund der Flexibilit"at und Skalierbarkeit ist T2 eine interessante
+SDE f"ur eingebettete Systeme. In anderen Anwendungsf"allen ist das
+Ziel des Nutzers die Entwicklung einer guten angepassten Linux
+Distribution -- der T2-Philosophie folgend mit originalbelassenen
+Paketen und Standartkompatiblen Installationen.
+Sicherlich ben"otigt eine exzelente Distribution
+mehr als einen Kernel, Bibliotheken und Software. T2 bietet dazu eine
+Menge Zus"atze f"ur ein einfach zu wartendes, hochgradig
+konfigurierbares und komfortables System.
+
+%\hoitem{Hardware auto-detection} The hardware detection system is
+%exclusively designed around the Linux hotplug mechanism. This way the
+%same code-path is used for devices present at boot-up or plugged into
+%the system at run time yielding exactly the same configuration
+%whenever the user decides to connect the devices.
+\hoitem{Automatische Hardware-Erkennung}
+Die T2 Hardware Erkennung wurde exklusiv um den Linux Hotplug
+Mechanismus herum entwickelt. Auf diese Weise wird das gleiche
+Systemverhalten garantiert, egal ob Ger"ate schon beim Hochfahren
+vorhanden sind oder erst zur Laufzeit vom Nutzer angeschlossen werden.
+
+%\hoitem{Network configuration} For network configuration a modular
+%framework supporting: profiles, basic IP configuration, multiple interfaces,
+%stateful firewalling, W-LAN, PPP incl. analog modems, PPPoE (cable and DSL) as
+%well as CSD and GPRS for use with mobile phones.
+\hoitem{Netzwerk Konfiguration}
+Netzwerke lassen sich mit einem bereitgestelltem modularem Framework
+konfigurieren. Dieses unterst"utzt Netzwerkprofile, elementare IP
+Konfiguration, mehrere Interfaces, statefull Firewalling, W-LAN, PPP
+einschliesslich analoger Modems, PPPoE (Kabel und DSL) sowie CSD und
+GPRS f"ur die Nutzung von Mobiltelefonen.
+
+%\hoitem{Administration} T2 features an Install CD target with a full installer
+%supporting partitioning hard-drives, creating file-systems, defining
+%mount points, package selection and much more. The config tool STONE
+%allows administrators to configure system services, network and
+%behavior. STONE is compatible with the system's standard config files,
+%manual changes in those files are mostly preserved.
+\hoitem{Administration}
+T2 enth"alt ein Target zum Erstellen einer Installations CD mit
+vollst"andigem Installer. Letzterer erlaubt es, Festplatten zu
+partitionieren, Dateisysteme zu erstellen, Mount-Points zu definieren,
+Pakete auszuw"ahlen und vieles mehr. Das Konfigurationsprogramm STONE
+erm"oglicht es Administratoren Systemdienste, Netzwerke und Verhalten
+zu konfigurieren. STONE arbeitet auf den Systemeigenen Konfigurations
+Dateien und erh"alt manuelle A"nderungen auf diesen Dateien zum
+gro"stem Teil.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\hosection{T2 - a good choice}
+\hosection{T2 - eine gute Wahl}
+
+\hodeco{deco-10.eps}
+%T2 gives a good framework to build custom Linux based systems. Instead
+%of starting to build everything from scratch, one can benefit from all
+%the existing architectures and a full package repository. There are
+%even more advantages maintaining the product: A custom target's build
+%can be instantly reproduced and it is easy to perform slight
+%modifications and rebuild without having to do everything again
+%""manually"". When updating binary packages, there is a backup mode
+%for modified files, so no config file is accidentaly lost.
+%Together the support for different compilers and
+%interesting options like ulibc, T2 gives interesting perspectives
+%for the development of embedded systems.
+T2 bietet den optimalen Rahmen um Linux basierte Systeme zu
+entwickeln. Anstelle aufwendigem Eigenbau von Toolchain und Paketen zu
+betreiben, nutzen Sie die bereits existenten Portierungen und die
+vollst"andige Paketsammlungen von T2. Bei der Produktentwicklung
+entstehen viele weitere Vorteile gegen"uber der h"aufig "ublichen
+Methode "`from scratch"': Ein bereits definiertes Zielprodukt kann
+sofort reproduziert werden und es ist einfach, leichte Modifikationen
+durchzuf"uhren und dann den "Ubersetzungsprozess neu zu starten ohne
+die gesamte Arbeit von Hand neu zu machen. Beim Update von
+Bin"arpaketen existiert ein Sicherungsmodus f"ur bereits ver"anderte
+Konfigurationsdateien. Die Unterst"utzung verschiedener Compiler in
+Kombination mit Optionen wie die Verwendung der uclibc bietet
+interessante Perspektiven zur Entwicklung eingebetteter Systeme.
+
+
+\colorbox{MyLightGreen}{
+\begin{minipage}{\embfigwidth}
+\includegraphics*[scale=0.95, angle=-90]{t2-scaling.eps}
+{ \small \emph{ %T2 provides a common base for creation of various
+%systems on a wide set of target architectures with very different
+%requirements. The development environment scales for systems with low
+%memory footprints up to huge installations on servers or desktop computers.
+T2 bildet eine allgemeine Basis zur Entwicklung verschiedener Systeme
+auf einer gro"sen Anzahl von Zielarchitekturen mit unterschiedlichen
+Anforderungen. Die Entwicklungsumgebung skaliert von Systemen mit
+kleinem Speicher bis zu gro"sen Installationen auf Servern und Desktop
+Computern.}}
+\end{minipage}
+}
+
+%\hoitem{Quality Assurance} During T2 development, measurements are
+%used to assure the high quality level defined by the developers. The
+%sandbox environment is used to review the content installed by the
+%packages, as well as the preconditions needed to build the
+%package. In addition, a regression tester automatically verifies cross
+%builds for the supported architectures and tracks the build status for
+%every package included in T2. Since the system builds itself up in the
+%sandbox environment it is guaranteed to be stable to boot strap itself.
+\hoitem{Qualit"atssicherung}
+W"ahrend der Entwicklung von T2 werden diverse Ma"se angewendet, um
+das von den Entwicklern geforderte Qualit"atsniveau zu sichern. Die
+Sandbox Umgebung wird genutzt, um den Inhalt der installierten Pakete
+zu pr"ufen und die zum Bauen notwendigen Vorbedingungen zu ermitteln.
+Zus"atzlich werden regelm"a"sig automatische Regession Tests auf Cross
+Builds zu den unterst"utzten Architekturen durchgef"uhrt und somit der
+Status der einzelnen Paketes ermittelt. Da T2 seine eigene Sandbox
+selbst erstellt, wird eine stabile und kompatible "Ubersetzung
+gew"ahrleistet.
+
+%\hoitem{Why T2} With all the points outlined above, T2 offers
+%a solid base and a flexible framework for integration with your
+%custom applications. The state-of-the-art technology reduces the
+%development time and  the time to market.
+\hoitem{Warum T2}
+T2 bietet eine solide Basis und ein flexibles Framework zur
+Integration Ihrer Eigenentwicklungen. Modernste Technologie auf dem
+Stand der aktuellen Technik reduziert die Entwicklungszeit und
+garantiert damit eine schnelle Marktreife des Produktes.
+
+%Many end users and system administrators enjoy T2 with its
+%clean and tested packages for daily home or office use.
+Viele Endbenutzer und System Administratoren erfreuen sich bereits an
+den sauberen und getesteten T2 Paketen f"ur B"uro und Heimanwendungen.
+
+%With developers around the world, T2 is best suited for commercial
+%scale products, especially in the embedded and high performance
+%clustering market.
+Mit einer weltweiten Entwicklergemeinde eignet sich T2 optimal f"ur
+kommerzielle Produkte, auch in eingebetteten Systemen oder im
+High Performance Computing Bereich.
+
+\hosection{www.t2-project.org}
+\end{multicols}
+
+\end{document}
